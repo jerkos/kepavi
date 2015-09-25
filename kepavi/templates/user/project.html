@@ -1,0 +1,84 @@
+{% extends "sidebar_layout.html" %}
+{% block css %}
+    {{ super() }}
+    <style>
+        .analysis, .launch {
+{#            padding-top: 50px;#}
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <h1><span class="fa fa-book text-muted"></span> {{ project.title }}</h1>
+        <hr>
+    </div>
+
+    <div class="analysis row">
+        <div class="col-md-6">
+            {% if project.analysis | length %}
+                <div class="list-group">
+                    {% for analysis in project.analysis %}
+                        <h4 class="list-group-item">
+
+                            <a href="#">{{ analysis.title }}</a>
+                            &bull;
+                            <label class="label label-info">{{ analysis.kind }}</label>
+                            &bull;
+
+                                <label class="label label-{% if analysis.results_content == 'optimal' %}success{% else %}danger{% endif %}">{{ analysis.results_content }}</label>
+                            &bull;
+                            <span class="text-muted">created {{ analysis.creation_date | time_since }}</span>
+                            &bull;
+                            <small><a href="#"><span class="text-muted fa fa-download"></span> download result file</a></small>
+                        </h4>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="help-block">It seems that you do not have performed analysis yet. <span class="text-info">Start a Annotation or FBA analysis clicking buttons above.</span></p>
+            {% endif %}
+
+        </div>
+    </div>
+    <div class="row">
+        <h2>Launch new analysis</h2>
+        <hr>
+    </div>
+    <div class="launch row text-center">
+        <div class="col-md-4 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="text-left">Annotation/Database analysis</h4>
+                </div>
+                <div class="panel-body">
+                <ol>
+                    <li>Upload a peaklist file</li>
+                    <li>Adjust minimal parameters for algorithm</li>
+                    <li>Get your result</li>
+                </ol>
+                </div>
+                <div class="panel-footer">
+                <p class="text-center"><a href="" class="btn btn-info">Start</a></p>
+                    </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="text-left">Flux balance analysis</h4>
+            </div>
+            <div class="panel-body">
+                <ol>
+                <li>Upload your model or modify standard model</li>
+                <li>Perform FBA or KO simulation</li>
+                <li>Visualize your results</li>
+            </ol>
+            </div>
+                <div class="panel-footer">
+            <p class="text-center">
+                <a href="{{ url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug) }}" class="btn btn-info">Start</a>
+            </p>
+                    </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

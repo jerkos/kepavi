@@ -1,0 +1,89 @@
+{% extends "sidebar_layout.html" %}
+{% from "macros.html" import horizontal_field %}
+
+{% block title %}
+    {{ current_user.username }} - Projects
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="metabomatch, about">
+    <meta name="description" content="The reasons why we made metabomatch">
+{% endblock %}
+
+{% block content %}
+    <!-- Login Modal -->
+        <div class="modal fade" id="createProjectForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form role="form" method="post" action="{{ url_for('user.create_project', username=current_user.username) }}">
+                    {{ create_project_form.hidden_tag() }}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Create new Project</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            {{ horizontal_field(create_project_form.title) }}
+                        </div>
+                    </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info">Create porject</button>
+                  </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!--endlogin model -->
+
+    <div class="row">
+        <h1>Projects/Models management</h1>
+        <hr>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1">
+                    <h2>Projects <a href="#" class="btn btn-success"><span class="fa fa-plus"></span> new project</a></h2>
+                    {% if current_user.projects | length %}
+        {#                <ul class="nav nav-stacked">#}
+                            <div class="list-group">
+                            {% for project in  current_user.projects %}
+                                <li class="list-group-item">
+                                    <span class="text-muted fa fa-book"></span>
+                                    <a href="{{ url_for('user.project', username=current_user.username, project_id=project.id, slug=project.slug) }}">
+                                        <strong>{{ project.title }}</strong>
+                                    </a>
+                                    &bull;
+                                    {{ project.analysis | length }} analysis
+                                    &bull;
+                                    <span class="text-muted">last modified {{ project.analysis | sort(attribute='creation_date') | last | attr('creation_date') | time_since }}</span>
+                                </li>
+
+                            {% endfor %}
+                            </div>
+        {#                </ul>#}
+                    {% else %}
+                        <p>
+                            <em>No project for the moment.</em><br/>
+                            <button class="btn btn-info" data-toggle="modal" data-target="#createProjectForm">Create a new one ?</button>
+                        </p>
+                    {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>Your models</h2>
+             {% if current_user.biomodels_diffs | length %}
+                <ul class="nav nav-stacked">
+                    {% for model in current_user.biomodels_diffs %}
+                        <li>
+                            <a style="display:inline;" href="#"><strong>{{ model.title }}</strong></a>&bull; from model <em>{{ model.biomodel.name }}</em> </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>
+                    <em>You have not modified models yet.</em><br/>
+                    <a href="#">Create a new one ?</a>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

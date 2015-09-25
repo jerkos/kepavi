@@ -1,0 +1,263 @@
+{% extends "sidebar_layout.html" %}
+{#{% from "macros.html" import horizontal_field %}#}
+{#{% from "macros.html" import render_select_field %}#}
+{% from "macros.html" import field_errors, field_description %}
+
+{% block title %}
+    {{ current_user.username }} - Projects
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="kepavi, flux balance analysis">
+    <meta name="description" content="Parameters setting for performing flux balance analysis in kepavi">
+{% endblock %}
+
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chosen.min.css') }}">
+    <style>
+        select {
+            min-width:250px;
+        }
+
+        .loader, .loader-1 {
+            display:none;
+        }
+
+        .reactions-table {
+            margin-top: 20px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <h1>Create FBA analysis</h1>
+        <hr/>
+    </div>
+    <form id="my-crazy-form">
+        {{ form.hidden_tag() }}
+{#        method="post" action="{{ url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug) }}">#}
+
+        <div class="row" style="width:100%;">
+            <div class="col-md-5 col-md-offset-1">
+                <h2>1. Informations</h2>
+
+                <div class="form-group {%- if form.title.errors %} has-error{%- endif %}">
+                    <label for="title">title</label>
+                    <input name="title" type="text" required class="form-control" id="title" placeholder="Analysis title goes here">
+                    {{ field_description(form.title) }}
+                    {{ field_errors(form.title) }}
+                </div>
+                 <div class="form-group {%- if form.model.errors %} has-error{%- endif %}">
+                    <label for="model">Choose a model:</label><br/>
+                    <select name="model" required class="model-selector form-control">
+                        <option disabled selected>select a model...</option>
+                        {% for k, v in form.model.choices %}
+                            <option value="{{ k }}">{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ field_description(form.model) }} <span class="loader-1 fa fa-spinner fa-spin"></span>
+                    {{ field_errors(form.model) }}
+                </div>
+                <div class="form-group {%- if form.reactions.errors %} has-error{%- endif %}">
+                    <label for="reactions">Choose reactions to optimize:</label><br/>
+                    <select name="reactions" multiple required disabled class="reactions-selector form-control">
+                        <option disabled selected>select a model...</option>
+
+    {#                        {% for k, v in form.model.choices %}#}
+    {#                            <option value="{{ k }}">{{ v }}</option>#}
+    {#                        {% endfor %}#}
+                    </select>
+                    {{ field_description(form.reactions) }}
+                    {{ field_errors(form.reactions) }}
+                </div>
+
+
+                </div>
+                <div class="col-md-5">
+                    <h2>2. Constraints</h2>
+                    <p class="help-block">You can change constraints applied to the model. Just select a reaction and
+                        click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
+                        signify more uptake. <a href="#">For more informations follow our tutorial</a></p>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <select disabled class="constraint-selector form-control">
+                                    <option disabled selected>select a constraint...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="modify-constraint" class="btn btn-info">Modify constraint</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="reactions-table table">
+                        <thead>
+                            <tr>
+                                <th>reaction name</th>
+                                <th>lower bound</th>
+                                <th>upper bound</th>
+                                <th class="text-center">Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+        </div>
+        <div class="row text-center" style="padding-top: 50px;">
+                <div class="form-group">
+                        <button id="submit" type="submit" class="btn btn-lg btn-info">Start FBA</button>
+                </div>
+        </div>
+
+        <div class="row text-center">
+                <p class="loader text-center"><img src="{{ url_for('static', filename='img/hex-loader2.gif') }}" height="100" alt="loader"></p>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block javascript %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/chosen.jquery.min.js')}}"></script>
+    <script>
+        $(function(){
+            var model_selector = $(".model-selector");
+             model_selector.chosen({
+                no_results_text: "No match found..."
+            });
+            var reactions_selector = $('.reactions-selector');
+            reactions_selector.chosen();
+
+            var constraint_selector = $('.constraint-selector');
+            constraint_selector.chosen();
+
+            var reactions_table_body = $('.reactions-table tbody');
+
+            model_selector.on('change', function(evt, params) {
+                // remove all options
+                var model_name = $('.model-selector option:selected').text();
+                $('.reactions-selector option').remove();
+                $('.constraint_selector option').remove();
+                $('.loader-1').css('display', 'inline-block');
+                $.get("{{ url_for('user.get_reactions', username=current_user.username) }}?model_name=" + model_name,
+                        function (data) {
+                            console.log(data);
+                            console.log("populating patwhay...");
+                            for (i = 0, l = data.length; i < l; ++i) {
+                                var d = data[i];
+                                var reversiblity = "";
+
+                                if (d['reversibility']) reversiblity = "reversible";
+                                else reversiblity = "irreversible";
+
+                                reactions_selector.append($('<option>', {
+                                    value: d['name'],
+                                    text: d['name'] + "- " + reversiblity
+                                }));
+
+                                constraint_selector.append($('<option>', {
+                                    value:d['name'],
+                                    text: d['name'] + ' - lower bound:' + d['lower_bound'] + ' - upper bound:' + d['upper_bound']
+                                }));
+                            }
+
+
+
+                             $('#modify-constraint').on('click', function(e) {
+                                    e.preventDefault();
+                                    var constraint = $('.constraint-selector option:selected').text();
+                                    var splitted = constraint.split(" - ");
+                                    reactions_table_body.append("<tr><td>" + splitted[0] +
+                                        '</td><td><input class="lower-bound-input form-control" type="number" min="-1000" max="1000" step="0.1" value="' + splitted[1].split(':')[1]
+                                        +'"></td><td><input class="upper-bound-input form-control" type="number" min="-1000" max="1000" step="0.1" value="' + splitted[2].split(':')[1]
+                                        +'"></td><td class="text-center"><button type="button" class="remove-line btn btn-default">Remove</button></td></tr>');
+
+                                     $(".remove-line").on('click', function(e) {
+                                            e.preventDefault();
+                                            alert('clicked event');
+                                            $(this).closest('tr').remove();
+                                        });
+                                });
+
+                            reactions_selector.removeAttr('disabled');
+                            constraint_selector.removeAttr('disabled');
+                            reactions_selector.trigger("chosen:updated");
+                            constraint_selector.trigger("chosen:updated");
+                            $('.loader-1').css('display', 'none');
+                            console.log('done');
+
+                        },
+                        "json");
+            });
+
+            var form = $('#my-crazy-form');
+            form.on('submit', function(e){
+                e.preventDefault();
+{#                console.log($('.model-selector option:selected').text());#}
+{#                console.log($('.reactions-selector option:selected').text());#}
+                $('.loader').css('display', 'inline-block');
+                var constraints = [];
+                var row = $('.reactions-table tbody tr');
+                row.each(function(){
+                    var row_data = {};
+                    row_data['name'] = $(this).text();
+
+                    var i = 0;
+                    $(this).find('input').each(function(){
+{#                        console.log(this.value);#}
+                        if (i == 0)
+                            row_data['lower_bound'] = parseFloat(this.value);
+                        else
+                            row_data['upper_bound'] = parseFloat(this.value);
+                        i += 1;
+                    });
+                    constraints.push(row_data);
+                });
+
+                var reactions_name = [];
+                $('.reactions-selector option:selected').each(function(i, e){
+                    reactions_name.push($(this).text().split("- ")[0]);
+                });
+                var data = {
+                    'model': $('.model-selector option:selected').text(),
+                    'objective_functions':  reactions_name, //$('.reactions-selector option:selected').text(),
+                    'constraints': constraints,
+                    'project_id': {{ project.id }},
+                    'title': $('#title').val()
+                };
+
+                console.log(data);
+
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token.current_token }}")
+                        }
+                    }
+                });
+
+                $.ajax({
+                  type: 'POST',
+                  url: "{{ url_for('user.launch_fba', username=current_user.username)}}",
+                  data: JSON.stringify(data),
+                  error: function(e) {
+                    console.log(e);
+                  },
+                  success:function(data){
+                    window.location.href = data['redirect']
+                  },
+                  dataType: "json",
+                  contentType: "application/json"
+
+                });
+            });
+        });
+    </script>
+{% endblock %}

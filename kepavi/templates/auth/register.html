@@ -1,0 +1,38 @@
+{% extends "centered_layout.html" %}
+
+{% set page_title = "Register" %}
+
+{% block content %}
+{% from "macros.html" import horizontal_field %}
+
+<form class="form-horizontal" role="form" method="POST">
+    <h2>Register</h2>
+    <hr>
+    {{ form_register.hidden_tag() }}
+    {{ horizontal_field(form_register.username)}}
+    {{ horizontal_field(form_register.email)}}
+    {{ horizontal_field(form_register.password)}}
+    {{ horizontal_field(form_register.confirm_password)}}
+
+    {% if config["RECAPTCHA_ENABLED"] %}
+        {{ horizontal_field(form_register.recaptcha) }}
+    {% endif %}
+
+    {#    <div class="form-group">#}
+    {#        <div class="col-lg-offset-2 col-lg-3">#}
+    {#            <div class="checkbox">#}
+    {#                <label>#}
+    {#                    <input type="checkbox"> {{ form.accept_tos }} I accept the <a href="#">Terms of Service</a>#}
+    {#                </label>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
+
+    <div class="form-group">
+        <div class="col-lg-12 text-right">
+            <button type="submit" class="btn btn-success">Register</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

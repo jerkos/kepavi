@@ -1,0 +1,204 @@
+{% from "macros.html" import field_errors, field_description %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>
+        {% block title %}
+            {%- if page_title -%}
+                {{ page_title }} - Kepavi
+            {%- else -%}
+                Kepavi: Kegg Pathway Tool viewer
+            {%- endif -%}
+        {% endblock %}
+        </title>
+
+        {% block keywords %}
+            <meta name="keywords" content="omics services, metabolomics, software, ranking, best, number one, scripts, parameters">
+            <meta name="description" content="Metabomatch is a website for comparing metabolomics softwares and helps choosing the best one for your needs.">
+        {% endblock %}
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Marc Dubois">
+
+        <meta property="og:site_name" content="Metabomatch"/>
+        <meta property="og:title" content="Metabomatch"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:description"
+              content="Metabomatch is a website for comparing metabolomics softwares and helps choosing the best one for your needs."/>
+        <meta property="og:locale" content="en_US"/>
+        <meta property="og:url" content="http://www.metabomatch.com/"/>
+
+        <meta property="twitter:card" content="summary_large_image"/>
+        <meta property="twitter:site" content="@metabomatch"/>
+        <meta property="twitter:creator" content="@metabomatch"/>
+
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
+
+        {% block css %}
+            <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
+            <link href='https://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+            <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" >
+{#            <link rel="stylesheet" href="{{ url_for('static', filename='css/code.css') }}">#}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/flaskbb.css') }}">
+            <style>
+                #wrap .container {
+                    padding: 0 15%;
+                }
+
+                #login-button:hover {
+                    color:white;
+                    background-color:black;
+                }
+            </style>
+        {% endblock %}
+
+{#        GA script#}
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-46475206-5', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </head>
+
+    <body>
+        <!-- Login Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form role="form" method="post" action="{{ url_for('auth.login') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Login</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="form-group {%- if form.login.errors %} has-error{%- endif %}">
+                                    <label for="exampleInputEmail1">Email address</label>
+                                    <input name="login" type="email" required class="form-control" id="exampleInputEmail1" placeholder="Email">
+                                    {{ field_description(form.login) }}
+                                    {{ field_errors(form.login) }}
+                                </div>
+                                <div class="form-group {%- if form.password.errors %} has-error{%- endif %}">
+                                    <label for="exampleInputEmail1">Password</label>
+                                    <input name=password type="password" required class="form-control" id="exampleInputPassword" placeholder="Password">
+                                    {{ field_description(form.password) }}
+                                    {{ field_errors(form.password) }}
+                                </div>
+
+                            </div>
+                            <div class="row text-center">
+                                <div class="form-group">
+{#                                   <div class="col-sm-3">#}
+                                        <div class="checkbox">
+                                            <label>
+                                                {{ form.remember_me }} Remember Me
+                                            </label>
+                                        </div>
+{#                                   </div>#}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <p>
+                                <span class="pull-left"><strong>Not yet registered ? <a href="{{ url_for('auth.register') }}">Register now</a></strong></span>
+                                <span class="pull-right"><a href="{{ url_for('auth.forgot_password') }}">Forgot password ?</a></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info">Login !</button>
+                  </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!--endlogin model -->
+
+         {% block navigation %}
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-fixed-top">
+              <div class="container">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">KEPAVI</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                  <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                  </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                       <li><a id="login-button" href="#" class="btn btn-info" data-toggle="modal" data-target="#myModal">Login</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+
+              </div>
+            </nav>
+        {% endblock %}
+
+        {% block jumbo %}
+        {% endblock %}
+
+        <div id="wrap">
+            <div class="container" >
+                {% block messages %}
+                    {% include 'flashed_messages.html' %}
+                {% endblock %}
+                {% block content %}
+                {% endblock %}
+            </div> <!-- /container -->
+        </div> <!-- end wrap -->
+
+        {% block footer %}
+            <div id="footer" style="background-color: #222222;">
+                <div class="container-fluid">
+                    <div class="row text-center" style="padding-top: 20px;">
+                        <div class="col-md-1 col-md-offset-5">
+                            <a href="https://www.facebook.com/metabomatch"><span
+                                    class="fa fa-facebook fa-2x text-muted"></span></a>
+                        </div>
+                        <div class="col-md-1">
+                            <a href="https://twitter.com/metabomatch"><span
+                                    class="fa fa-twitter fa-2x text-muted"></span></a>
+                        </div>
+                    </div>
+                    <div class="row text-center" style="padding-top: 20px">
+                        <p class="text-muted"><strong>Copyright Kepavi 2015. All rights reserved.</strong>
+                            Powered by <a href="http://flask.pocoo.org">Flask.</a>
+                            Hosted at <a href="http://heroku.com" title="heroku website">Heroku</a>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+
+        {% block javascript %}
+            <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+            <script>
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip();
+                })
+            </script>
+        {% endblock %}
+
+        {% block scripts %}
+        {% endblock %}
+    </body>
+</html>

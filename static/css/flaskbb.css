@@ -1,0 +1,284 @@
+html,
+body {
+  height: 100%; /* The html and body elements cannot have any padding or margin. */
+  font-family: 'Oswald', sans-serif;/*'Play', sans-serif;*/
+}
+
+
+.navbar {
+    height: 60px !important;
+    background-color: #0288D1;
+    font-size: 1.3em;
+    font-family: 'Bangers', cursive;
+}
+
+.navbar-brand {
+    color:white;
+}
+
+.navbar-brand:hover {
+     color:#7C4DFF;
+}
+
+#navbar .nav li {
+    height: 60px;
+}
+#navbar .nav li a{
+    color: white;
+    height:100%;
+}
+
+#navbar .nav li a:hover {
+    color:#7C4DFF;
+    background-color:white;
+
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  min-width: 100%;
+  /*height: auto !important;*/
+  /*height: 100%; /!* Negative indent footer by its height *!/*/
+  /*margin: 0 auto -60px;*/
+  /*padding: 0 0 60px; /!* Pad bottom by footer height *!/*/
+  margin-top: 100px;
+    /*padding: 0 15%;*/
+  /*width: 70%;*/
+}
+
+
+.divider {
+    margin-top:0 !important;
+    padding:0 ! important;
+    border: 1px solid #B6B6B6;
+}
+
+.main-sidebar {
+
+}
+
+.sidebar-menu {
+    background-color: #FFFFFF;
+    color: #212121;
+    opacity:1.0;
+    margin-top: -50px;
+}
+
+.sidebar-menu .nav {
+    padding-top: 2em;
+}
+
+.sidebar-menu .nav li a {
+    color: #212121;
+    text-decoration: none;
+    transition: all 0.2s linear;
+}
+
+.sidebar-menu .nav li a:hover {
+    border-bottom: 2px solid #7C4DFF;
+}
+
+.brand {
+    background-color: #03A9F4;
+    font-size: 1.2em;
+    color: #B3E5FC;
+    padding: 0.8em 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.sidebar-stats {
+    margin-top: 50px;
+    font-size: 1.2em;
+    /*background-color:#7C4DFF;*/
+    color:black;
+}
+
+.sidebar-stats .nav li {
+    padding: 5px 0;
+}
+
+.sidebar-title {
+    font-size: 2em;
+    padding-bottom: 20px;
+}
+
+
+/* Set the fixed height of the footer here */
+/*#footer {*/
+  /*height: 200px;*/
+  /*background-color: #f5f5f5;*/
+/*}*/
+.container .credit {
+  margin: 20px 0;
+}
+
+#footer > .container {
+  /*margin: 0 auto 15px;*/
+  /*padding-left: 15px;*/
+  /*padding-right: 15px;*/
+}
+
+.pagination-text {
+  cursor: default;
+  background-color: #fff;
+  border-color: #ddd;
+}
+
+/*
+ * Option to remove the borders from the table
+ */
+/* borderless table */
+.table .table-borderless td, .table.table-borderless th {
+border: 0 !important;
+}
+
+.table .table-borderless {
+margin-bottom: 0px;
+}
+
+/*
+ * Nav Header
+ * Got these lines from bootstrap 2.3.2
+ */
+.nav-header {
+  display: block;
+  padding: 3px 15px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 20px;
+  color: #999999;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+.nav li + .nav-header {
+  margin-top: 9px;
+}
+
+/*
+ * Side navigation
+ *
+ * Scrollspy and affixed enhanced navigation to highlight sections and secondary
+ * sections of docs content.
+ *
+ * Copied from the bootstrap3 docs.css file which is licensed under the
+ * Apache 2.0 license.
+ */
+
+/* By default it's not affixed in mobile views, so undo that */
+.sidebar.affix {
+  position: static;
+}
+
+/* First level of nav */
+.sidenav {
+  margin-bottom: 30px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-shadow: 0 1px 0 #fff;
+  background-color: #f7f5fa;
+  border-radius: 5px;
+}
+
+/* All levels of nav */
+.sidebar .nav > li > a {
+  display: block;
+  color: #716b7a;
+  padding: 5px 20px;
+}
+.sidebar .nav > li > a:hover,
+.sidebar .nav > li > a:focus {
+  text-decoration: none;
+  background-color: #e5e3e9;
+  border-right: 1px solid #dbd8e0;
+}
+.sidebar .nav > .active > a,
+.sidebar .nav > .active:hover > a,
+.sidebar .nav > .active:focus > a {
+  font-weight: bold;
+  color: #0088cc;
+  background-color: transparent;
+  border-right: 1px solid #0088cc;
+}
+
+/* Nav: second level (shown on .active) */
+.sidebar .nav .nav {
+  display: none; /* Hide by default, but at >768px, show it */
+  margin-bottom: 8px;
+}
+.sidebar .nav .nav > li > a {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 30px;
+  font-size: 90%;
+}
+
+/* Show and affix the side nav when space allows it */
+@media screen and (min-width: 992px) {
+  .sidebar .nav > .active > ul {
+    display: block;
+  }
+  /* Widen the fixed sidebar */
+  .sidebar.affix,
+  .sidebar.affix-bottom {
+    width: 213px;
+  }
+  .sidebar.affix {
+    position: fixed; /* Undo the static from mobile first approach */
+    top: 80px;
+  }
+  .sidebar.affix-bottom {
+    position: absolute; /* Undo the static from mobile first approach */
+  }
+  .sidebar.affix-bottom .sidenav,
+  .sidebar.affix .sidenav {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  /* Widen the fixed sidebar again */
+  .sidebar.affix-bottom,
+  .sidebar.affix {
+    width: 263px;
+  }
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+.form-signin .checkbox {
+  font-weight: normal;
+}
+.form-signin .form-control {
+  position: relative;
+  font-size: 16px;
+  height: auto;
+  padding: 10px;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+/* End sidebar */
