@@ -12,7 +12,8 @@
 import json
 import logging
 import cobra
-from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba
+from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba, build_kegg_network, build_kegg_network_mixed
+from kepavi.kegg_utils import Kegg, Organism
 from kepavi.utils import s3_upload_from_server
 import os
 from datetime import datetime
@@ -26,9 +27,10 @@ from flask import Blueprint, flash, request, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
 from kepavi.extensions import db
+from requests.packages.urllib3.exceptions import ConnectionError
 
 try:
-    from kepavi.private_keys import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+    from kepavi.private_keys import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, S3_URL
 except ImportError:
     TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
     TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
@@ -76,6 +78,7 @@ def create_fba_analysis(username, project_id, slug):
 @user.route('/<username>/get_reactions')
 @login_required
 def get_reactions(username):
+    print 'get_reactions called'
     model_name = request.args.get('model_name')
     if not model_name:
         flash("An error occured", 'error')
@@ -119,6 +122,7 @@ def launch_fba(username):
     # create analysis object
     a = Analysis(title=data['title'],
                  kind=Analysis.KIND[0],
+                 model_id = model.id,
                  project_id=project_id)
     a.results_content = solution.status
 
@@ -157,7 +161,73 @@ def launch_fba(username):
     flash('FBA analysis {} saved...'.format(title), 'success')
 
     return json.dumps({'redirect': url_for('user.profile', username=username)})
-    # return redirect(url_for('user.profile', username=current_user.username))
+
+
+@user.route("/<username>/visualize/<int:analysis_id>")
+@login_required
+def visualize_fba_analysis(username, analysis_id):
+    analysis = Analysis.query.filter(Analysis.id == analysis_id).first_or_404()
+
+    # retrieve file data from s3
+    filename = '{}/{}/{}'.format(username, analysis.project_id, analysis_id)
+    resp = requests.get(S3_URL + filename)
+
+    # return error code if request failed
+    if resp.status_code != 200:
+        return 500
+
+    # model = get_sbml_from_s3(analysis.model.url)
+    # results = json.loads(resp.text)
+    # data = _build_cytoscape_network(model, results)
+
+    orgs = Organism.query.order_by(Organism.tax).all()
+    return render_template('user/fba_analysis.html', analysis=analysis, organisms=orgs)
+
+
+@user.route('/<username>/get_pathways', methods=['GET'])
+def get_pathways(username):
+    org = request.args.get('org', 'hsa')  # the default will be the human.
+    pathways = Kegg.get_pathways_list(org)
+    data = json.dumps(pathways)
+    return data
+
+
+@user.route('/<username>/get_kgml', methods=['GET'])
+@login_required
+def get_kgml(username):
+
+    pathway_id = request.args.get('pathway_id')
+    if pathway_id is None:
+        return json.dumps([])
+
+    analysis_id = request.args.get('analysis_id')
+    analysis = Analysis.query.filter(Analysis.id == analysis_id).first_or_404()
+
+    # retrieve file data from s3
+    filename = '{}/{}/{}'.format(username, analysis.project_id, analysis_id)
+    try:
+        resp = requests.get(S3_URL + filename)
+    except ConnectionError:
+        return render_template('errors/server_error.html'), 500
+    # return error code if request failed
+    if resp.status_code != 200:
+        return render_template('errors/server_error.html'), 500
+
+    # load fba analysis results
+    results = json.loads(resp.text)
+
+    # get the sbml model
+    model = get_sbml_from_s3(analysis.model.url)
+
+    kegg_model = Kegg.get_kgml(pathway_id)
+
+    if model is None or kegg_model is None:
+        return render_template('errors/page_not_found.html'), 404
+
+    kegg_model_name = request.args.get('pathway_name')
+
+    cytoscape_formatted = build_kegg_network_mixed(kegg_model, kegg_model_name, model, results)
+    return json.dumps(cytoscape_formatted)
 
 
 @user.route("/settings/password", methods=["POST", "GET"])
@@ -182,17 +252,3 @@ def change_email():
 
         flash("Your email have been updated!", "success")
     return render_template("user/change_email.html", form=form)
-
-
-# @user.route("/settings/user-details", methods=["POST", "GET"])
-# @login_required
-# def change_user_details():
-#     form = ChangeUserDetailsForm(obj=current_user)
-#
-#     if form.validate_on_submit():
-#         form.populate_obj(current_user)
-#         current_user.save()
-#
-#         flash("Your details have been updated!", "success")
-#
-#     return render_template("user/change_user_details.html", form=form)

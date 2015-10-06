@@ -60,7 +60,16 @@ class Kegg(object):
         return {}
 
     @staticmethod
-    def get_kgml(pathway_id, show_compounds_img=False):
+    def get_kgml(pathway_id):
+        if pathway_id.startswith('path:'):
+            pathway_id = pathway_id.replace('path:', '')
+        resp = requests.get(''.join([Kegg.BASE_URL, 'get/', pathway_id, '/kgml']))
+        if resp.status_code == 200:
+            return kgml_read(resp.text)
+        return None
+
+    @staticmethod
+    def get_kgml_network(pathway_id, show_compounds_img=False):
         if pathway_id.startswith('path:'):
             pathway_id = pathway_id.replace('path:', '')
         resp = requests.get(''.join([Kegg.BASE_URL, 'get/', pathway_id, '/kgml']))
@@ -79,7 +88,7 @@ class Kegg(object):
                 # obfuscated with it.
                 if entry_type in {'ortholog', 'map', 'enzyme', 'group'}:
                     continue
-                Kegg._add_node(data, entry, cpd_names_by_cpd_ids)
+                Kegg._add_node(data, entry)
 
             for reaction in pathway.reactions:
                 reac_id = reaction.id
@@ -105,7 +114,7 @@ class Kegg(object):
         return []
 
     @staticmethod
-    def _add_node(data, entry, cpd_names_by_cpd_ids, show_compound_img=False):
+    def _add_node(data, entry, name=None, show_compound_img=False):
         """
         css properties are not applied when they are in snakeCase.
         :param entry:
@@ -115,16 +124,18 @@ class Kegg(object):
         entry_type = entry.type
         graphics = entry.graphics[0]
 
-        if entry_type == 'gene':
-            name = entry.reaction.split(' ')[0][3:]
-        elif entry_type == 'compound':
-            name = cpd_names_by_cpd_ids.get(graphics.name, graphics.name)
-        else:
-            name = graphics.name
+        # if entry_type == 'gene':
+        #     name = entry.reaction.split(' ')[0][3:]
+        # elif entry_type == 'compound':
+        #     name = graphics.name  # cpd_names_by_cpd_ids.get(graphics.name, graphics.name)
+        # else:
+        #     name = graphics.name
+
+        node_name = name or graphics.name
 
         node_data = {'id': entry.id,
-                     'name': name,
-                     'content': name,
+                     'name': node_name,
+                     'content': node_name,
                      # reactions labeled are centered by default
                      'textValign': 'center' if entry_type == 'gene' else 'top',
                      'width': graphics.width,
@@ -132,10 +143,10 @@ class Kegg(object):
                      'backgroundColor': graphics.bgcolor,
                      'type': Kegg.CYTOSCAPE_SHAPES[graphics.type],
                      'borderColor': '#000000',
-                     'borderWidth': 1,
-                     'backgroundImage': 'none',
-                     'backgroundFit': 'cover',
-                     'backgroundClip': 'none'}
+                     'borderWidth': 1}
+                     # 'backgroundImage': 'none',
+                     # 'backgroundFit': 'cover',
+                     # 'backgroundClip': 'none'}
 
         if entry_type == 'compound' and show_compound_img:
             node_data.update({

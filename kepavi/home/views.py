@@ -37,9 +37,10 @@ def get_kgml():
     pathway_id = request.args.get('pathway_id')
     if pathway_id is None:
         return []
-    cytoscape_formatted = Kegg.get_kgml(pathway_id)
+    cytoscape_formatted = Kegg.get_kgml_network(pathway_id)
     j = json.dumps(cytoscape_formatted)
     return j
+
 
 @home.route('about', methods=['GET'])
 def about():

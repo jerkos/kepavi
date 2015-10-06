@@ -10,6 +10,7 @@ from flask_wtf.csrf import CsrfProtect
 from flask_gravatar import Gravatar
 from flask_babel import Babel
 from flask_oauthlib.client import OAuth
+from flask_mongoengine import MongoEngine
 
 # Database
 db = SQLAlchemy()
@@ -37,3 +38,5 @@ htmlminify = HTMLMIN()
 
 #  twitter oauth
 oauth = OAuth()
+
+mongo = MongoEngine()

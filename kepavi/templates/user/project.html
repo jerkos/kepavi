@@ -20,7 +20,7 @@
                     {% for analysis in project.analysis %}
                         <h4 class="list-group-item">
 
-                            <a href="#">{{ analysis.title }}</a>
+                            <a href="{{ url_for('user.visualize_fba_analysis', username=current_user.username, analysis_id=analysis.id) }}">{{ analysis.title }}</a>
                             &bull;
                             <label class="label label-info">{{ analysis.kind }}</label>
                             &bull;

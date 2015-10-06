@@ -31,7 +31,7 @@ from kepavi.auth.views import auth
 from kepavi.home.views import home
 
 # extensions
-from kepavi.extensions import db, login_manager, cache, migrate, github, csrf, gravatar, babel, oauth
+from kepavi.extensions import db, login_manager, cache, migrate, github, csrf, gravatar, babel, oauth, mongo
 
 
 def create_app(config=None):
@@ -49,6 +49,8 @@ def create_app(config=None):
     # github extensions, TODO put that into configs directory
     app.config['GITHUB_CLIENT_ID'] = 'ed057c9e07f531f0fdb6'
     app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET') or GITHUB_CLIENT_SECRET
+
+    app.config['MONGODB_SETTINGS'] = {'db': 'biomodels', 'host': 'mongodb://localhost:27017/biomodels'}
 
     configure_blueprints(app)
 
@@ -115,6 +117,8 @@ def configure_extensions(app):
     babel.init_app(app)
 
     oauth.init_app(app)
+
+    mongo.init_app(app)
 
 
 def configure_template_filters(app):

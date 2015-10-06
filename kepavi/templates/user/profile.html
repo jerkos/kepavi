@@ -43,7 +43,7 @@
 
     <div class="row">
         <div class="col-md-5 col-md-offset-1">
-                    <h2>Projects <a href="#" class="btn btn-success"><span class="fa fa-plus"></span> new project</a></h2>
+                    <h2>Projects <button data-toggle="modal" data-target="#createProjectForm" class="btn btn-success"><span class="fa fa-plus"></span> new project</button></h2>
                     {% if current_user.projects | length %}
         {#                <ul class="nav nav-stacked">#}
                             <div class="list-group">
@@ -56,7 +56,11 @@
                                     &bull;
                                     {{ project.analysis | length }} analysis
                                     &bull;
+                                    {% if project.analysis | length %}
                                     <span class="text-muted">last modified {{ project.analysis | sort(attribute='creation_date') | last | attr('creation_date') | time_since }}</span>
+                                    {% else %}
+                                        <span class="text-muted">No analysis yet</span>
+                                    {% endif %}
                                 </li>
 
                             {% endfor %}

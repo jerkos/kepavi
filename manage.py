@@ -1,3 +1,5 @@
+import bioservices
+from kepavi.biomodels import BiomodelMongo
 from kepavi.user.models import User, Biomodel
 import os
 import csv
@@ -64,13 +66,39 @@ def initdb():
     logging.info('Done !')
 
 
-
 @manager.command
 def dropdb():
     """Deletes the database"""
     db.drop_all()
 
 
+def insert_model(xml_model):
+    import cobra.io
+    import json
+    from lxml import etree
+
+    sbml_model = cobra.io.read_sbml_model(xml_model)
+    cobra.io.save_json_model(sbml_model, 'test.json')
+    d = json.loads(open('test.json').read().encode('utf-8'))
+
+    tree = etree.parse(xml_model)
+    root = tree.getroot()
+    organism = root[0].attrib['name'].split(' - ')[1]
+    biomodel = BiomodelMongo(organism=organism, model=d)
+    biomodel.save()
+
+
+@manager.command
+def insert_models():
+    import glob
+    import cobra.io
+    models = glob.glob('./BioModels_Database/*')[14:]
+    print models
+    for m in models:
+        try:
+            insert_model(m)
+        except Exception:
+            pass
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     manager.run()

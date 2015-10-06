@@ -1,0 +1,230 @@
+{% extends "sidebar_layout.html" %}
+
+{% block title %}
+    Visualize network
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="metabomatch, about">
+    <meta name="description" content="The reasons why we made metabomatch">
+{% endblock %}
+
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chosen.min.css') }}">
+    <style>
+        .meta-loader {
+            display: none;
+        }
+
+        .load-cytoscape-btn {
+            margin-top: 50px;
+        }
+
+        #cytoscape-container {
+            height:100%;;
+        }
+
+    hr {
+        border: 1px solid white;
+{#        border: 1px solid black;#}
+    }
+    </style>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
+
+{% endblock %}
+
+{% block content %}
+
+    <form>
+        <div class="row">
+            <div class="col-md-5">
+                <h2>1. Select an Organism</h2>
+
+                <div class="form-group">
+                    <select class="org_selector" style="width:75%">
+                        <option value="none" selected disabled>Choose an organism...</option>
+                        {% for o in organisms %}
+                            <option value="{{ o.org }}">{{ o.tax }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-block">Pathway are loaded when you choose an organism. <span class="meta-loader fa fa-circle-o-notch fa-spin"></span></p>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <h2>2. Select a pathway</h2>
+                 <div class="form-group">
+                    <select class="pathway_selector" style="width:75%">
+                        <option value="none" selected disabled>Choose a pathway...</option>
+                    </select>
+                    <p id="help" class="help-block">Choose an organism first.</p>
+                 </div>
+            </div>
+            <div class="col-md-2">
+                <button class="load-cytoscape-btn btn btn-info" disabled>Load pathway</button>
+            </div>
+        </div>
+    </form>
+    <div class="row">
+        <div id="cytoscape-container" style="height: 600px; border: 3px solid black">
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/arbor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cola.v3.min.js') }}"></script>
+
+
+    <script src="{{ url_for('static', filename='js/cytoscape.min.js') }}"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.js"></script>
+{#    <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.js"></script>#}
+    <script src="{{ url_for('static', filename='js/cytoscape.qtip.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chosen.jquery.min.js')}}"></script>
+    <script>
+        $(function() {
+
+{#            $('.sidebar-menu').css('height', $(document).height() + 'px');#}
+
+            var org_selector = $(".org_selector");
+            org_selector.chosen({
+                no_results_text: "No match found..."
+            });
+
+            var pathway_selector = $('.pathway_selector');
+            pathway_selector.attr('disabled');
+{#            pathway_selector.chosen({no_results_text: "No match found..."});#}
+
+            console.log(pathway_selector);
+            var meta_loader = $('.meta-loader');
+
+            org_selector.on('change', function(evt, params){
+
+                // remove all options
+                $('.pathway_selector option').remove();
+                $('#help').css('display', 'none');
+                console.log('on change event');
+                meta_loader.css('display', 'inline');
+                console.log(params['selected']);
+                $.get("{{ url_for('home.get_pathways') }}?org=" + params['selected'],
+                        function(data){
+                            console.log("populating patwhay...");
+                            for (i=0,l=data.length; i < l; ++i) {
+                                var d = data[i];
+                                pathway_selector.append($('<option>', {value: d['id'], text:d['name']}));
+                            }
+                            console.log('done');
+                            $('.load-cytoscape-btn').removeAttr('disabled');
+                            pathway_selector.removeAttr('disabled');
+
+                            meta_loader.css('display', 'none');
+                        },
+                        "json");
+            });
+
+            /** get some kgml data */
+            $('.load-cytoscape-btn').on('click', function(evt){
+                evt.preventDefault();
+                var pathway_id = pathway_selector.val();
+                var pathway_name = $('.pathway_selector option:selected').text();
+                $.get("{{ url_for('user.get_kgml', username=current_user.username) }}?pathway_name=" + pathway_name + "&pathway_id=" + pathway_id + "&analysis_id=" + "{{ analysis.id }}",
+                        function(data){
+                            var flux_min = data['flux_min'];
+                            var flux_max = data['flux_max'];
+                             $('#cytoscape-container').cytoscape({
+                                 style: cytoscape.stylesheet()
+                                    .selector('node')
+                                      .css({
+                                             'content': 'data(name)',
+                                             'text-valign': 'center', //'data(textValign)',
+                                             'text-halign': 'center',
+{#                                             'width': 'data(width)',#}
+{#                                             'height': 'data(height)',#}
+                                             'background-color': '#FFFFFF', //#'data(backgroundColor)',
+                                             'shape': 'ellipse', //data(type)',
+                                             'border-color': '#CDDC39',
+                                             'border-width': 2, //data(borderWidth)',
+                                             'font-size': 8
+{#                                             'background-image': 'data(backgroundImage)',#}
+{#                                             'background-fit': 'data(backgroundFit)',#}
+{#                                             'background-clip': 'data(backgroundClip)'#}
+                                      })
+                                 .selector('edge')
+                                      .css({
+{#                                             'opacity': 'mapData(flux,' + flux_min + ', ' + flux_max + ', 0.3, 1)',#}
+{#                                             'content': 'data(content)',#}
+                                             'text-halign': 'right',
+                                             'target-arrow-shape':  'data(targetArrowShape)',
+                                             'source-arrow-shape':  'data(sourceArrowShape)',
+                                             'font-size': 6,
+                                             'color': 'blue',
+                                             'line-color': 'mapData(flux,' + flux_min + ', ' + flux_max + ', blue, red)',
+                                             'source-arrow-color': 'mapData(flux,' + flux_min + ', ' + flux_max + ', blue, red)',
+                                             'target-arrow-color': 'mapData(flux,' + flux_min + ', ' + flux_max + ', blue, red)',
+                                             'width': 'mapData(absflux, 0, 1000, 2, 10)'
+                                      }),
+                                elements: data,
+{#                                 layout: {name: 'cose', idealEdgeLength: 100, nodeRepulsion: 1000000, edgeElasticity:200},#}
+                                layout: {name: 'preset' //, infinite:false
+{#                                    edgeLength: function(e) {#}
+{#                                        var l = e['data']['flux'];#}
+{#                                        if (l < 0) return 0;#}
+{#                                        else return l/100.0;#}
+{#                                    }#}
+                                },
+                                motionBlur: false,
+
+                                ready: function(){
+{#                                    // to remove oprhans nodes...#}
+                                    this.nodes().forEach(function( ele ){
+                                        if (ele.outdegree() == 0 && ele.indegree() == 0)
+                                            ele.remove()
+                                    });
+                                    this.fit();
+                                    this.elements('edge').qtip({
+                                        id: function() {
+                                            return this.data('id');
+                                        },
+                                        content: function() {
+                                            var s =  '<h3>' + this.data('content') + '<h3><br /><em>flux: <span class="label label-';
+                                            if (this.data('flux') < 0 )
+                                                s += 'danger';
+                                            else if (this.data('flux') == 0)
+                                                s += 'default';
+                                            else
+                                                s += 'success';
+                                            return s + '">' + this.data('flux') + '</span></em>';
+                                        },
+                                        position: {
+                                            my: 'bottom right',
+                                            viewport: $("#cytoscape-container"),
+                                            adjust: {
+                                                cyViewport: true,
+                                                method: 'flip none'
+                                            }
+                                        },
+                                        show: {
+                                            cyBgOnly: false
+                                        },
+                                        hide: {
+                                            cyBgOnly: false,
+                                            cyViewport: true,
+                                            delay: 100
+                                        },
+                                        style: {
+                                            classes: 'qtip-tipsy',
+                                            tip: {
+                                                width: 16,
+                                                height: 8
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        },
+                        "json");
+            });
+        });
+    </script>
+{% endblock %}

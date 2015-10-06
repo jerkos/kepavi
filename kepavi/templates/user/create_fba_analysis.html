@@ -29,86 +29,160 @@
             margin-top: 20px;
         }
 
+        .table {
+{#            font-family: "nsole";#}
+            font-size: 0.8em;
+        }
+
+        .remove-table {
+            display:none;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 
+{#    modal #}
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Flux balance analysis launched</h4>
+              </div>
+              <div class="modal-body">
+                <p class="text-center">Loading ...</p>
+                <p class="text-center"> <img src="{{ url_for('static', filename='img/hex-loader2.gif') }}" height="100" alt="loader"></p>
+              </div>
+{#              <div class="modal-footer">#}
+{#                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
+{#              </div>#}
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
     <div class="row">
-        <h1>Create FBA analysis</h1>
+        <h1>Create new Flux Balance Analysis</h1>
         <hr/>
     </div>
+
+    <div class="alert alert-info">
+        <p>Sbml models must have Kegg informations IDs for reactions and metabolites (in their <code>notes</code> tag)in order to have a proper
+        visualization respecting Kegg maps layout. To see proper example, see those models taken from
+        <a href="http://www.ebi.ac.uk/biomodels-main">Biomodels</a>.</p>
+    </div>
+
     <form id="my-crazy-form">
         {{ form.hidden_tag() }}
 {#        method="post" action="{{ url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug) }}">#}
 
         <div class="row" style="width:100%;">
-            <div class="col-md-5 col-md-offset-1">
+            <div class="col-md-6">
                 <h2>1. Informations</h2>
+                <hr>
 
                 <div class="form-group {%- if form.title.errors %} has-error{%- endif %}">
-                    <label for="title">title</label>
+                    <label for="title">Analysis title:</label>
                     <input name="title" type="text" required class="form-control" id="title" placeholder="Analysis title goes here">
                     {{ field_description(form.title) }}
                     {{ field_errors(form.title) }}
                 </div>
                  <div class="form-group {%- if form.model.errors %} has-error{%- endif %}">
-                    <label for="model">Choose a model:</label><br/>
+                    <label for="model">Choose a model: <span class="loader-1 fa fa-spinner fa-spin"></span></label><br/>
                     <select name="model" required class="model-selector form-control">
                         <option disabled selected>select a model...</option>
                         {% for k, v in form.model.choices %}
                             <option value="{{ k }}">{{ v }}</option>
                         {% endfor %}
                     </select>
-                    {{ field_description(form.model) }} <span class="loader-1 fa fa-spinner fa-spin"></span>
+                    {{ field_description(form.model) }}
                     {{ field_errors(form.model) }}
                 </div>
-                <div class="form-group {%- if form.reactions.errors %} has-error{%- endif %}">
-                    <label for="reactions">Choose reactions to optimize:</label><br/>
-                    <select name="reactions" multiple required disabled class="reactions-selector form-control">
-                        <option disabled selected>select a model...</option>
+                <div class="form-group {%- if form.model.errors %} has-error{%- endif %}">
+                    <label for="model">Choose one or several objective functions:</label><br/>
 
+                    <select disabled class="reactions-selector form-control" style="width:70%;">
+                        <option disabled selected>select a objective function...</option>
+                    </select>
+                    <button id="add-objective" class="btn btn-info">Add objective function</button><br/>
+                    <span id="objective-errors" class=text-danger></span>
+                </div>
+
+                <table class="objective-table table">
+                    <thead>
+                        <tr>
+                            <th>reaction name</th>
+{#                            <th class="text-center">Maximize/minimize</th>#}
+                            <th class="text-center remove-line">Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+
+                <div class="form-group {%- if form.model.errors %} has-error{%- endif %}">
+                    <label for="optimize-sense">Optimization sense:</label><br/>
+
+                    <select id="optimize-sense" name="optimize-sense" class="optimize-sense form-control">
+                        <option selected>maximize</option>
+                        <option>minimize</option>
+                    </select>
+                </div>
+{#                <div class="form-group {%- if form.reactions.errors %} has-error{%- endif %}">#}
+{#                    <label for="reactions">Choose reactions to optimize:</label><br/>#}
+{#                    <select name="reactions" multiple required disabled class="reactions-selector form-control">#}
+{#                        <option disabled selected>select a model...</option>#}
+{##}
     {#                        {% for k, v in form.model.choices %}#}
     {#                            <option value="{{ k }}">{{ v }}</option>#}
     {#                        {% endfor %}#}
-                    </select>
-                    {{ field_description(form.reactions) }}
-                    {{ field_errors(form.reactions) }}
-                </div>
+{#                    </select>#}
+{#                    {{ field_description(form.reactions) }}#}
+{#                    {{ field_errors(form.reactions) }}#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label for="optimize-sense">Omptimization sense</label><br/>#}
+{#                    <select name="optimize-sense" required class="form-control">#}
+{#                        <option selected value="maximize">maximize</option>#}
+{#                        <option value="minimize">minimize</option>#}
+{#                    </select>#}
+{#                </div>#}
 
 
-                </div>
-                <div class="col-md-5">
-                    <h2>2. Constraints</h2>
-                    <p class="help-block">You can change constraints applied to the model. Just select a reaction and
-                        click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
-                        signify more uptake. <a href="#">For more informations follow our tutorial</a></p>
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-md-9">
-                                <select disabled class="constraint-selector form-control">
-                                    <option disabled selected>select a constraint...</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button id="modify-constraint" class="btn btn-info">Modify constraint</button>
-                            </div>
+            </div>
+            <div class="col-md-6">
+                <h2>2. Constraints</h2>
+                <hr>
+                <p class="help-block">You can change constraints applied to the model. Just select a reaction and
+                    click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
+                    signify more uptake. <a href="#">For more informations follow our tutorial</a></p>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <select disabled class="constraint-selector form-control">
+                                <option disabled selected>select a constraint...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button id="modify-constraint" class="btn btn-info">Modify constraint</button>
                         </div>
                     </div>
-                    <table class="reactions-table table">
-                        <thead>
-                            <tr>
-                                <th>reaction name</th>
-                                <th>lower bound</th>
-                                <th>upper bound</th>
-                                <th class="text-center">Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
                 </div>
+                <table class="reactions-table table">
+                    <thead>
+                        <tr>
+                            <th>reaction name</th>
+                            <th>lower bound</th>
+                            <th>upper bound</th>
+                            <th class="text-center">Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="row text-center" style="padding-top: 50px;">
                 <div class="form-group">
@@ -141,15 +215,20 @@
             var reactions_table_body = $('.reactions-table tbody');
 
             model_selector.on('change', function(evt, params) {
+                console.log("changed");
+                model_selector.prop('disabled', true);
+                model_selector.trigger("chosen:updated");
                 // remove all options
                 var model_name = $('.model-selector option:selected').text();
                 $('.reactions-selector option').remove();
                 $('.constraint_selector option').remove();
+
+                // display loader
                 $('.loader-1').css('display', 'inline-block');
                 $.get("{{ url_for('user.get_reactions', username=current_user.username) }}?model_name=" + model_name,
                         function (data) {
-                            console.log(data);
-                            console.log("populating patwhay...");
+{#                            console.log(data);#}
+                            console.log("populating reactions...");
                             for (i = 0, l = data.length; i < l; ++i) {
                                 var d = data[i];
                                 var reversiblity = "";
@@ -168,8 +247,6 @@
                                 }));
                             }
 
-
-
                              $('#modify-constraint').on('click', function(e) {
                                     e.preventDefault();
                                     var constraint = $('.constraint-selector option:selected').text();
@@ -181,10 +258,52 @@
 
                                      $(".remove-line").on('click', function(e) {
                                             e.preventDefault();
-                                            alert('clicked event');
                                             $(this).closest('tr').remove();
                                         });
+                             });
+
+                            $('#add-objective').on('click', function(e) {
+{#                                $('.objective-table').css('display', 'inline');#}
+                                e.preventDefault();
+
+                                var reaction = $('.reactions-selector option:selected').text();
+                                var splitted = reaction.split('- ');
+                                var found = false;
+                                var objective_table_text = $('.objective-table tbody tr td:first');
+                                for(i=0; i<objective_table_text.length; ++i) {
+                                    var td = $(objective_table_text[i]).text();
+                                    if (td == splitted[0])
+                                        found=true;
+                                }
+                                if (found) {
+                                    $('#objective-errors').text('Reaction already added');
+                                    return;
+                                }
+
+                                $('.objective-table').append('<tr>' +
+                                        '<td>' + splitted[0] +
+                                        '</td>' +
+{#                                        '<td>' +#}
+{#                                        '<select id="objective-sense"><option value="maximize">maximize</option><option value="minimize">minimize</option></select>' +#}
+{#                                        '</td>' +#}
+                                        '<td class="text-center">' +
+                                        '<button type="button" class="remove-line btn btn-default">Remove</button>' +
+                                        '</td>' +
+                                        '</tr>');
+                                if ($('.objective-table tbody tr').length == 0) {
+                                    $('.objective-table').removeClass('remove-table');
+                                }
+                                // set empty value
+                                $('#objective-errors').text('');
+                                $(".remove-line").on('click', function(e) {
+                                    e.preventDefault();
+                                    $(this).closest('tr').remove();
+
+                                    if ($('.objective-table tbody tr').length == 0) {
+                                        $('.objective-table').addClass('remove-table');
+                                    }
                                 });
+                            });
 
                             reactions_selector.removeAttr('disabled');
                             constraint_selector.removeAttr('disabled');
@@ -193,16 +312,19 @@
                             $('.loader-1').css('display', 'none');
                             console.log('done');
 
+                            model_selector.removeAttr('disabled');
+                            model_selector.trigger("chosen:updated");
                         },
                         "json");
+
             });
 
+            // submit form
             var form = $('#my-crazy-form');
             form.on('submit', function(e){
                 e.preventDefault();
 {#                console.log($('.model-selector option:selected').text());#}
 {#                console.log($('.reactions-selector option:selected').text());#}
-                $('.loader').css('display', 'inline-block');
                 var constraints = [];
                 var row = $('.reactions-table tbody tr');
                 row.each(function(){
@@ -222,9 +344,23 @@
                 });
 
                 var reactions_name = [];
-                $('.reactions-selector option:selected').each(function(i, e){
-                    reactions_name.push($(this).text().split("- ")[0]);
+
+                var row_objective = $('.objective-table tbody tr');
+                row_objective.each(function(){
+                    var raw_data = {};
+                    raw_data['name'] =  $(this).find('td:first').text();
+                    var select = $(this).find('select')[0];
+                    console.log(select);
+                    console.log('objective_sense:' + select.options[select.selectedIndex].value);
+                    raw_data['objective_sense'] = select.value;
+                    reactions_name.push(raw_data);
                 });
+
+                if (reactions_name.length == 0) {
+                    $("#objective-errors").append('You must choose at least one objective function.');
+                    return;
+                }
+
                 var data = {
                     'model': $('.model-selector option:selected').text(),
                     'objective_functions':  reactions_name, //$('.reactions-selector option:selected').text(),
@@ -234,6 +370,7 @@
                 };
 
                 console.log(data);
+                $('.loader').css('display', 'inline-block');
 
                 $.ajaxSetup({
                     beforeSend: function(xhr, settings) {
@@ -248,6 +385,7 @@
                   url: "{{ url_for('user.launch_fba', username=current_user.username)}}",
                   data: JSON.stringify(data),
                   error: function(e) {
+                      //TODO redirect to an error page
                     console.log(e);
                   },
                   success:function(data){

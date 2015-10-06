@@ -55,8 +55,11 @@ class Biomodel(db.Model, InsertableMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     url = db.Column(db.String(200), nullable=False)
+
     insertion_date = db.Column(db.DateTime, default=datetime.utcnow())
+
     sbml_version = db.Column(db.String(100), default="2")
+
     layout_available = db.Column(db.Boolean, default=False)
     fbc_availabale = db.Column(db.Boolean, default=True)
 
@@ -69,8 +72,15 @@ class Analysis(db.Model, InsertableMixin):
     title = db.Column(db.String(200), nullable=False)
     kind = db.Column(db.String(200), default=KIND[0])
     creation_date = db.Column(db.DateTime, default=datetime.utcnow())
+
     results_url = db.Column(db.String(200))
     results_content = db.Column(db.Text)
+
+    model_id = db.Column(db.Integer, db.ForeignKey('biomodels.id'))
+    model = db.relationship('Biomodel', foreign_keys=[model_id], backref='analysis')
+
+    model_diff_id = db.Column(db.Integer, db.ForeignKey('biomodels_diffs.id'), nullable=True)
+    model_diff = db.relationship('BiomodelModification', foreign_keys=[model_diff_id], backref='analysis')
 
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
     project = db.relationship('Project', foreign_keys=[project_id], backref='analysis')

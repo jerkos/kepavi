@@ -1,7 +1,10 @@
 html,
 body {
   height: 100%; /* The html and body elements cannot have any padding or margin. */
-  font-family: 'Oswald', sans-serif;/*'Play', sans-serif;*/
+  /*font-family: 'Oswald', sans-serif;/!*'Play', sans-serif;*!/*/
+    font-family: 'Open Sans', sans-serif;
+/*, sans-serif;*/
+  font-size: 1.05em;
 }
 
 
@@ -20,6 +23,10 @@ body {
      color:#7C4DFF;
 }
 
+#navbar .nav {
+    margin-left: 100px;
+}
+
 #navbar .nav li {
     height: 60px;
 }
@@ -30,7 +37,9 @@ body {
 
 #navbar .nav li a:hover {
     color:#7C4DFF;
-    background-color:white;
+    /*background-color: inherit;*/
+    /*background-color:white;*/
+    background-color: #BBDEFB;
 
 }
 
