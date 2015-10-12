@@ -37,29 +37,33 @@
         .remove-table {
             display:none;
         }
+
+        .purple {
+            color:#7C4DFF;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 
 {#    modal #}
-    <div class="modal fade" id="myModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Flux balance analysis launched</h4>
-              </div>
-              <div class="modal-body">
-                <p class="text-center">Loading ...</p>
-                <p class="text-center"> <img src="{{ url_for('static', filename='img/hex-loader2.gif') }}" height="100" alt="loader"></p>
-              </div>
+{#    <div class="modal fade" id="myModal">#}
+{#        <div class="modal-dialog">#}
+{#            <div class="modal-content">#}
+{#              <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                <h4 class="modal-title">Flux balance analysis launched</h4>#}
+{#              </div>#}
+{#              <div class="modal-body">#}
+{#                <p class="text-center">Loading ...</p>#}
+{#                <p class="text-center"> <img src="{{ url_for('static', filename='img/hex-loader2.gif') }}" height="100" alt="loader"></p>#}
+{#              </div>#}
 {#              <div class="modal-footer">#}
 {#                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
 {#              </div>#}
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+{#            </div><!-- /.modal-content -->#}
+{#        </div><!-- /.modal-dialog -->#}
+{#    </div><!-- /.modal -->#}
 
     <div class="row">
         <h1>Create new Flux Balance Analysis</h1>
@@ -76,9 +80,10 @@
         {{ form.hidden_tag() }}
 {#        method="post" action="{{ url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug) }}">#}
 
-        <div class="row" style="width:100%;">
-            <div class="col-md-6">
-                <h2>1. Informations</h2>
+        <div class="row" style="padding: 0 15%;">
+{#            style="width:100%;">#}
+{#            <div class="col-md-8">#}
+                <h2 class="purple">1. Informations</h2>
                 <hr>
 
                 <div class="form-group {%- if form.title.errors %} has-error{%- endif %}">
@@ -117,7 +122,6 @@
                         </tr>
                     </thead>
                     <tbody>
-
                     </tbody>
                 </table>
 
@@ -151,8 +155,9 @@
 
 
             </div>
-            <div class="col-md-6">
-                <h2>2. Constraints</h2>
+            <div class="row" style="padding: 0 15%;">
+{#            <div class="col-md-12">#}
+                <h2 class="purple">2. Modify constraints</h2>
                 <hr>
                 <p class="help-block">You can change constraints applied to the model. Just select a reaction and
                     click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
@@ -179,11 +184,10 @@
                         </tr>
                     </thead>
                     <tbody>
-
                     </tbody>
                 </table>
             </div>
-        </div>
+{#        </div>#}
         <div class="row text-center" style="padding-top: 50px;">
                 <div class="form-group">
                         <button id="submit" type="submit" class="btn btn-lg btn-info">Start FBA</button>
@@ -225,7 +229,7 @@
 
                 // display loader
                 $('.loader-1').css('display', 'inline-block');
-                $.get("{{ url_for('user.get_reactions', username=current_user.username) }}?model_name=" + model_name,
+                $.get("{{ url_for('user.get_sbml_reactions', username=current_user.username) }}?model_name=" + model_name,
                         function (data) {
 {#                            console.log(data);#}
                             console.log("populating reactions...");
@@ -329,7 +333,7 @@
                 var row = $('.reactions-table tbody tr');
                 row.each(function(){
                     var row_data = {};
-                    row_data['name'] = $(this).text();
+                    row_data['name'] = $(this).find('td:first').text(); //$(this).text();
 
                     var i = 0;
                     $(this).find('input').each(function(){
@@ -349,10 +353,10 @@
                 row_objective.each(function(){
                     var raw_data = {};
                     raw_data['name'] =  $(this).find('td:first').text();
-                    var select = $(this).find('select')[0];
-                    console.log(select);
-                    console.log('objective_sense:' + select.options[select.selectedIndex].value);
-                    raw_data['objective_sense'] = select.value;
+{#                    var select = $(this).find('select')[0];#}
+{#                    console.log(select);#}
+{#                    console.log('objective_sense:' + select.options[select.selectedIndex].value);#}
+{#                    raw_data['objective_sense'] = select.value;#}
                     reactions_name.push(raw_data);
                 });
 

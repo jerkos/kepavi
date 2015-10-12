@@ -40,20 +40,20 @@ def _launch_fba(model, objectives, user_params, optimize_sense='maximize'):
     def get_reac_by_name(name):
 
         # escaping parenthesis
-        name = name.replace('(', '\(')
-        name = name.replace(')', '\)')
+        # name = name.replace('(', '\(')
+        # name = name.replace(')', '\)')
 
-        reacts = model.reactions.query(name, 'name')
+        reacts = model.reactions.query(lambda x: True if x == name else False, 'name')
         try:
             return reacts[0]
         except IndexError:
-            logging.warn('reaction not found')
+            logging.warn('reaction not found: {}'.format(name))
             return None
     # end function
 
     # update objective functions
     for obj in objectives:
-        react = get_reac_by_name(str(obj))
+        react = get_reac_by_name(str(obj['name']))
         if react is not None:
             react.objective_coefficient = 1.0
 

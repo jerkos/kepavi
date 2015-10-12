@@ -48,6 +48,10 @@
                     padding: 0 15%;
                 }
 
+                .padded-row {
+                     padding: 0 15%;
+                }
+
                 #login-button {
                     margin-top: 5px;
 {#                    color:inherit;#}
@@ -156,7 +160,7 @@
         {% block jumbo %}
         {% endblock %}
 
-        <div id="wrap">
+{#        <div id="wrap">#}
             <div class="container" >
                 {% block messages %}
                     {% include 'flashed_messages.html' %}
@@ -164,7 +168,7 @@
                 {% block content %}
                 {% endblock %}
             </div> <!-- /container -->
-        </div> <!-- end wrap -->
+{#        </div> <!-- end wrap -->#}
 
         {% block footer %}
             <div id="footer" style="background-color: #222222;">

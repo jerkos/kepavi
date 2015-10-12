@@ -12,14 +12,14 @@
 import json
 import logging
 import cobra
+from kepavi.biomodels import BiomodelMongo
 from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba, build_kegg_network, build_kegg_network_mixed
 from kepavi.kegg_utils import Kegg, Organism
 from kepavi.utils import s3_upload_from_server
 import os
 from datetime import datetime
 
-from kepavi.user.forms import ChangePasswordForm, ChangeEmailForm, CreateProjectForm, \
-    CreateFBAAnalysisForm  #, ChangeUserDetailsForm
+from kepavi.user.forms import CreateProjectForm, CreateFBAAnalysisForm
 from kepavi.user.models import Project, Analysis, User, Biomodel
 
 import requests
@@ -75,24 +75,26 @@ def create_fba_analysis(username, project_id, slug):
     return render_template('user/create_fba_analysis.html', form=form, project=p)
 
 
-@user.route('/<username>/get_reactions')
+@user.route('/<username>/get_sbml_reactions')
 @login_required
-def get_reactions(username):
-    print 'get_reactions called'
+def get_sbml_reactions(username):
     model_name = request.args.get('model_name')
     if not model_name:
         flash("An error occured", 'error')
         return redirect(request.referrer)
     u = User.query.filter(User.username == username).first_or_404()
-    model = Biomodel.query.filter(Biomodel.name == model_name).first()
-    if model is None:
-        return render_template('errors/page_not_found.html')
-        # for the moment this not allowed
-        # model = [b for b  in u.biomodels_diffs if b.title == model_name][0]
-        # if model is None:
-        #     return render_template('errors/page_not_found.html')
-    logging.info('getting sbml model from s3')
-    sbml_model = get_sbml_from_s3(model.url)
+    model = Biomodel.query.filter(Biomodel.name == model_name).first_or_404()
+
+    # for the moment this not allowed
+    # model = [b for b  in u.biomodels_diffs if b.title == model_name][0]
+    # if model is None:
+    #     return render_template('errors/page_not_found.html')
+
+    logging.info('loading model from mongodb...')
+    # TODO get the sbml model from mongodb
+    sbml_model = model.get_cobra_model()
+    if sbml_model is None:
+        return render_template('errors/server_error.html')
     d = []
     for r in sbml_model.reactions:
         d.append({
@@ -109,14 +111,22 @@ def get_reactions(username):
 @login_required
 def launch_fba(username):
     data = request.get_json(force=True)
-    print "DATA:", data
+
+    logging.debug(data)
 
     model_name = data['model']
     project_id = data['project_id']
     title = data['title']
 
     model = Biomodel.query.filter(Biomodel.name == model_name).first_or_404()
-    sbml_model = get_sbml_from_s3(model.url)
+
+    # have often exception here du to encoding issues
+    sbml_model = model.get_cobra_model()
+    if sbml_model is None:
+        return render_template('errors/server_error.html')
+
+    # sbml_model = get_sbml_from_s3(model.url)
+
     solution = _launch_fba(sbml_model, data['objective_functions'], data['constraints'])
 
     # create analysis object
@@ -125,7 +135,7 @@ def launch_fba(username):
                  model_id = model.id,
                  project_id=project_id)
     a.results_content = solution.status
-
+    a.serialized_properties = json.dumps(data)
     # in order to populate its id field
     a.save()
 
@@ -138,7 +148,7 @@ def launch_fba(username):
          'x_dict': solution.x_dict, 'y_dict': solution.y_dict}
 
     with open(filename, 'w') as f:
-        f.write(json.dumps(d))
+        f.write(json.dumps(d).encode('utf-8'))
 
     # upload to s3
     logging.info('uploading to s3')
@@ -174,7 +184,7 @@ def visualize_fba_analysis(username, analysis_id):
 
     # return error code if request failed
     if resp.status_code != 200:
-        return 500
+        return render_template('errors/server_error.html'), 500
 
     # model = get_sbml_from_s3(analysis.model.url)
     # results = json.loads(resp.text)
@@ -184,8 +194,8 @@ def visualize_fba_analysis(username, analysis_id):
     return render_template('user/fba_analysis.html', analysis=analysis, organisms=orgs)
 
 
-@user.route('/<username>/get_pathways', methods=['GET'])
-def get_pathways(username):
+@user.route('/<username>/get_kegg_pathways', methods=['GET'])
+def get_kegg_pathways(username):
     org = request.args.get('org', 'hsa')  # the default will be the human.
     pathways = Kegg.get_pathways_list(org)
     data = json.dumps(pathways)
@@ -217,8 +227,9 @@ def get_kgml(username):
     results = json.loads(resp.text)
 
     # get the sbml model
-    model = get_sbml_from_s3(analysis.model.url)
-
+    model = analysis.model.get_cobra_model() # get_sbml_from_s3(analysis.model.url)
+    if model is None:
+        return render_template('errors/server_error.html')
     kegg_model = Kegg.get_kgml(pathway_id)
 
     if model is None or kegg_model is None:
@@ -228,27 +239,3 @@ def get_kgml(username):
 
     cytoscape_formatted = build_kegg_network_mixed(kegg_model, kegg_model_name, model, results)
     return json.dumps(cytoscape_formatted)
-
-
-@user.route("/settings/password", methods=["POST", "GET"])
-@login_required
-def change_password():
-    form = ChangePasswordForm()
-    if form.validate_on_submit():
-        current_user.password = form.new_password.data
-        current_user.save()
-
-        flash("Your password have been updated!", "success")
-    return render_template("user/change_password.html", form=form)
-
-
-@user.route("/settings/email", methods=["POST", "GET"])
-@login_required
-def change_email():
-    form = ChangeEmailForm(current_user)
-    if form.validate_on_submit():
-        current_user.email = form.new_email.data
-        current_user.save()
-
-        flash("Your email have been updated!", "success")
-    return render_template("user/change_email.html", form=form)

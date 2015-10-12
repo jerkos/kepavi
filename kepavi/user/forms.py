@@ -10,7 +10,7 @@
 """
 from flask.ext.login import current_user
 from flask.ext.wtf import Form
-from kepavi.user.models import User, BiomodelModification, Biomodel
+from kepavi.user.models import User, BiomodelModification, Biomodel, Analysis
 from wtforms import (StringField, PasswordField, DateField, TextAreaField,
                      SelectField, ValidationError)
 from wtforms.validators import (Length, DataRequired, Email, EqualTo, regexp,
@@ -32,6 +32,13 @@ class CreateFBAAnalysisForm(Form):
     def set_models(self, user):
         l = [(b.title, b.title) for b in user.biomodels_diffs]
         self.model.choices = l + [(r[0], r[0]) for r in db.session.query(Biomodel.name).all()]
+
+    def validate(self):
+        is_valid = super(Form, self).validate()
+        analysis = Analysis.query(Analysis.title == self.title.data).first()
+        if analysis is None:
+            return is_valid
+        return False
 
 
 class CreateProjectForm(Form):

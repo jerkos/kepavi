@@ -9,14 +9,18 @@
     :license: BSD, see LICENSE for more details.
 """
 from datetime import datetime
+import logging
 
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import SignatureExpired
+from kepavi.biomodels import BiomodelMongo
 from kepavi.helpers import slugify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
 from flask_login import UserMixin
 import uuid
+
+import cobra.io
 
 from kepavi._compat import max_integer
 from kepavi.extensions import db, cache, github
@@ -53,15 +57,38 @@ class Biomodel(db.Model, InsertableMixin):
     __tablename__ = 'biomodels'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    url = db.Column(db.String(200), nullable=False)
+
+    # a name provided by the user creator
+    # should be the same one stored in mongodb if kegg_org is left
+    # empty
+    name = db.Column(db.String(200), nullable=False, unique=True)
+
+    # if this model represents a model coming from BioModels Whole Genome
+    # this should be filled
+    kegg_org = db.Column(db.String(10), nullable=True)
 
     insertion_date = db.Column(db.DateTime, default=datetime.utcnow())
 
-    sbml_version = db.Column(db.String(100), default="2")
-
+    # coming from BioModels: layout is not yet available but may be fix`ed`
+    # in next BioModels releases
     layout_available = db.Column(db.Boolean, default=False)
+
     fbc_availabale = db.Column(db.Boolean, default=True)
+
+    def get_cobra_model(self):
+
+        if self.kegg_org is not None:
+            model = BiomodelMongo.objects(organism=self.kegg_org).first()
+        else:
+            model = BiomodelMongo.objects(name=self.name).first()
+
+        # try to load the cobra model
+        cobra_model = None
+        try:
+            cobra_model = cobra.io._from_dict(model.cobra_model)
+        except Exception as e:
+            logging.error(e)
+        return cobra_model
 
 
 class Analysis(db.Model, InsertableMixin):
@@ -78,6 +105,9 @@ class Analysis(db.Model, InsertableMixin):
 
     model_id = db.Column(db.Integer, db.ForeignKey('biomodels.id'))
     model = db.relationship('Biomodel', foreign_keys=[model_id], backref='analysis')
+
+    # may be used to sotre analysis parameters as json properties
+    serialized_properties = db.Column(db.Text)
 
     model_diff_id = db.Column(db.Integer, db.ForeignKey('biomodels_diffs.id'), nullable=True)
     model_diff = db.relationship('BiomodelModification', foreign_keys=[model_diff_id], backref='analysis')
