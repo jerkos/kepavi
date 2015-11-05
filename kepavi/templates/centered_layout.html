@@ -45,7 +45,7 @@
             <link rel="stylesheet" href="{{ url_for('static', filename='css/flaskbb.css') }}">
             <style>
                 #wrap .container {
-                    padding: 0 15%;
+{#                    padding: 0 15%;#}
                 }
 
                 .padded-row {
@@ -57,6 +57,9 @@
 {#                    color:inherit;#}
 {#                    background-color:inherit;#}
                 }
+{#                #main-container {#}
+{#                    min-height: 100%;#}
+{#                }#}
             </style>
         {% endblock %}
 
@@ -160,15 +163,15 @@
         {% block jumbo %}
         {% endblock %}
 
-{#        <div id="wrap">#}
-            <div class="container" >
+        <div id="wrap">
+            <div class="container">
                 {% block messages %}
                     {% include 'flashed_messages.html' %}
                 {% endblock %}
                 {% block content %}
                 {% endblock %}
             </div> <!-- /container -->
-{#        </div> <!-- end wrap -->#}
+        </div> <!-- end wrap -->
 
         {% block footer %}
             <div id="footer" style="background-color: #222222;">
