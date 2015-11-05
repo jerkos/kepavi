@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    FAQ - Metabomatch
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="metabomatch, faq">
+    <meta name="description" content="Frequently asked questions on metabomatch usage">
+{% endblock %}
+
+
+
+{% block content %}
+    <h1><span class="fa fa-question text-muted"></span> F.A.Q</h1>
+    <p class="help-block">Send us an <a href="mailto:contact@metabomatch.com">email</a> if you have any questions.</p>
+    <hr/>
+    <p>
+        <strong>Can I add the software I wrote on <em>metabomatch</em> ?</strong><br/>
+        Of course. Just go to <a href="{{ url_for('softwares.register') }}"> the register software page</a>. Fill a
+        maximum of fields and save it. Feel free to
+        comment and upvote it !
+    </p>
+
+    <p>
+        <strong>How software gloabl rates are computed ?</strong><br/>
+        We compute a software rate using several informations about it:
+    <ul>
+        <li>useres mean rate</li>
+        <li>users upvotes</li>
+        <li><a href="github.com">github</a> statistics (#commits, #maintainers, #issues...)</li>
+        <li>software has been publicated or not</li>
+        <li>software is still maintained</li>
+        <li>Source code available or not</li>
+    </ul>
+    </p>
+
+    <p>
+        <strong>Why can we upvote a software several times a day ? Is it not cheated ?</strong><br/>
+        Indeed, original idea was to allow user to upvote only like <strong>5</strong> times a day. For the moment, we
+        preferred
+        give users POWER ! Upvotes count will be reset at the end of each month.
+    </p>
+
+    <p>
+        <strong>What are the advantages if I create an account on metabomatch ?</strong><br/>
+        You could post questions on our forums (be notified when a discussion has a new comment), post a comment (with a
+        fun objectivity analysis) and/or a rate on a software, read all users scripts about optimal software parameters,
+        little programs, and finally read/post job offers.
+    </p>
+{% endblock %}

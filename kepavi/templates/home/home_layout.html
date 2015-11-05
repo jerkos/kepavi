@@ -1,0 +1,256 @@
+{% extends "centered_layout.html" %}
+
+{% block title %}
+    Kepavi - Flux analysis
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="metabomatch, about">
+    <meta name="description" content="The reasons why we made metabomatch">
+{% endblock %}
+
+
+{% block css %}
+    {{ super() }}
+    <style>
+
+        .navbar {
+            padding: 0 23% 0 22%;
+            margin-bottom: 0
+        }
+
+        .container {
+            min-width: 100%;
+        }
+
+        .jumbotron {
+            color: white;
+            min-width: 100%;
+            min-height: 500px;
+            background-image: url("/static/img/computer.jpg");
+{#            background: -webkit-linear-gradient(#1565c0, #2196f3);#}
+{#              background: -o-linear-gradient(#1565c0, #2196f3);#}
+{#              background: -moz-linear-gradient(#1565c0, #2196f3);#}
+{#              background: linear-gradient(#1565c0, #2196f3);#}
+        }
+
+        .custom-button {
+            color:white;
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 10px 10px 10px 10px;
+            text-decoration: none;
+        }
+
+        .custom-button:hover {
+            text-decoration: none;
+            color:white;
+        }
+
+        #footer {
+            padding: 0 25% 0 25%;
+        {#            display: none;#}
+        }
+
+        .blank-link{
+            color:#0d47a1;
+{#            border-bottom: 2px solid #D26911;#}
+        }
+
+        .blank-link:hover {
+            color: #0d47a1;
+{#            text-decoration: none;#}
+        }
+
+        p {
+            text-indent: 20px;
+        }
+
+        .quotted {
+            font-size:3em;
+            padding: 1.6em 0;
+            color:white;
+        }
+
+        .services {
+            padding-bottom: 5em;
+        }
+
+
+        .option {
+{#            transition: all 0.5s ease;#}
+{#            padding-bottom: 20px;#}
+{#            background-color: lightgray;#}
+
+        }
+
+        .selected-option {
+{#            font-size: 2em;#}
+            border: 5px solid #7C4DFF;
+            border-radius: 5px;
+        }
+
+        .purple {
+            color:#7C4DFF;
+        }
+
+        .selected-option h3 {
+{#            font-size: 1.2em;#}
+        }
+
+        .price {
+            font-size: 2em;
+        }
+
+        .prices {
+            min-height:570px;
+        }
+
+        .parallax {
+
+            background-image: url('/static/img/universe.jpg');
+            background-size: cover;
+            padding-bottom: 50px;
+{#            min-width: 150%;#}
+        }
+
+        .opt-wrapper {
+            text-align: center;
+            width: 70%;
+            background-color: lightgray;
+            padding: 10px 10px;
+
+        }
+    </style>
+{% endblock %}
+{% block jumbo %}
+
+        <div class="jumbotron">
+            <div class="container text-center">
+                <h2 class="text-center" style="margin: 2em;">The <em>best metabolomic software</em> for your needs.</h2>
+                <p><a id="software-chooser" class="custom-button" href="{{ url_for('home.visualization') }}">Start now</a></p>
+                <p class="text-center" style="margin-top: 2em;">Did not find the software you use ? Do not hesitate to <a class="blank-link" href="#">register</a> it.</p>
+                <p style="padding-top: 5px;">Discuss about <em>softwares algorithms, problems, features</em> in our <a class="blank-link" href="#">forums</a>.</p>
+            </div>
+        </div>
+{% endblock %}
+
+{% block content %}
+        <div class="row padded-row text-center services">
+            <div class="col-md-4">
+                <h3><span class="purple fa fa-2x fa-cart-plus"></span><br/><br/><strong><em class="purple">2630</em> available models</strong></h3>
+                <p class="text-justify">
+                    We offer many models for more flexibility. You work on an unfamiliar organism ... there is a good chance that you will find a corresponding model here !
+                    You can see all available models here: <a href="">Biomodels</a>.
+{#                    We provide all models from <a href="biomodels.org">Biomodels</a>#}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h3><span class="purple fa fa-2x fa-cubes"></span><br/><br/><strong>Visualize pathways</strong></h3>
+                <p class="text-justify">
+                    Each standard model can be viewed using <a href="#">Kegg</a> layout. You won't be lost: looking for the compound
+                    you are interested in will be really familiar... plus <em>flux balance analysis</em> results displayed on the graph !
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h3><span class="purple fa fa-2x fa-plus"></span><br/><br/><strong>Create your own model</strong></h3>
+                <p class="text-justify">
+                    Compounds, reactions can be added to a model in a special tool. You will be able to save your model,
+                    and eventually share it with others Kepavi users.
+                </p>
+            </div>
+        </div>
+
+        <hr>
+        <div class="row parallax">
+
+            <p class="text-center quotted">
+                <em>
+                    <span class="fa fa-quote-left"></span>
+                    The simplest tool for doing metabolomics and flux analysis.
+                    <span class="fa fa-quote-right"></span>
+                </em>
+            </p>
+
+        </div>
+        <hr>
+        <div class="row padded-row">
+            <h2 id="prices" class="text-center">Prices</h2>
+            <p class="text-block text-center" style="padding-bottom: 20px;">All plans include a free trial of 15 days.</p>
+        </div>
+{#        <a class="btn btn-default">Start free trial</a>#}
+        <div class="row padded-row prices text-center" style="padding-bottom: 100px;">
+            <div class="col-md-4">
+                <div class="opt-wrapper center-block option  selected-option">
+                    <h3 class="text-center"><span class="fa fa-mortar-board fa-2x"></span> Starter Pack</h3>
+                    <hr>
+                    <p class="price"><strong>19</strong><small class="text-muted">/ month</small></p>
+    {#                <ul class="nav nav-stacked">#}
+    {#                    <li><strong>5</strong> analyses</li>#}
+    {#                    <li>bandwidth 5Go</li>#}
+    {#                    <li>Lorem</li>#}
+    {#                    <li>Ipsum</li>#}
+    {#                </ul>#}
+                    <div class="list-group">
+                        <li class="list-group-item"><strong>5</strong> analyses</li>
+                        <li class="list-group-item">bandwidth 5Go</li>
+                        <li class="list-group-item">Lorem</li>
+                        <li class="list-group-item">Ipsum</li>
+                    </div>
+                    <a href="#" class="btn btn-info">Get this</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="opt-wrapper center-block option">
+                    <h3 class="text-center"><span class="fa fa-flask fa-2x"></span> Research Pack</h3>
+                    <hr>
+                    <p class="price"><strong>149</strong><small class="text-muted">/ month</small></p>
+                     <div class="list-group">
+                        <li class="list-group-item"><strong>5</strong> analyses</li>
+                        <li class="list-group-item">bandwidth 5Go</li>
+                        <li class="list-group-item">Lorem</li>
+                        <li class="list-group-item">Ipsum</li>
+                    </div>
+                    <a href="#" class="btn btn-info">Get this</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="opt-wrapper center-block option">
+                    <h3 class="text-center"><span class="fa fa-rocket fa-2x"></span> Nobel Pack</h3>
+                    <hr>
+                    <p class="price"><strong>999</strong><small class="text-muted">/ month</small></p>
+                     <div class="list-group">
+                        <li class="list-group-item"><strong>5</strong> analyses</li>
+                        <li class="list-group-item">bandwidth 5Go</li>
+                        <li class="list-group-item">Lorem</li>
+                        <li class="list-group-item">Ipsum</li>
+                    </div>
+                    <a href="#" class="btn btn-info">Get this</a>
+                </div>
+            </div>
+        </div>
+
+{#        <h2 class="text-center">Tutorials</h2>#}
+{#        <div class="row text-center" style="padding-bottom: 50px;">#}
+{#        <iframe width="1000" height="450" src="https://www.youtube.com/embed/on4TMnuYTaU" frameborder="0" allowfullscreen></iframe>#}
+{#        </div>#}
+{% endblock %}
+
+{% block javascript %}
+    {{ super() }}
+    <script>
+        $(function(){
+{#            $(".option").each(function(){#}
+                $(".option").hover(function(){
+                    console.log("hover");
+                    {#                    $(".option").each(function(){#}
+{#                        $(this).removeClass("selected-option");#}
+{#                    });#}
+                    $(".option").removeClass("selected-option");
+                    $(this).addClass("selected-option");
+                });
+{#            });#}
+        });
+    </script>
+{% endblock %}

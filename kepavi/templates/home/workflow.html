@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Classical workflow in LC-MS analysis - Metabomatch
+{% endblock %}
+
+
+{% block keywords %}
+    <meta name="keywords" content="metabolomics, LC/MS, mass spectrometry, chromatography, softwares, workflow, pipeline, peak-picking, alignment, identification, database search, statistical analysis">
+    <meta name="description" content="LC-MS workflow is briefly explained in this page. Pipeline steps are detailed.">
+{% endblock %}
+
+{%  block content %}
+
+
+    <div class="row" style="padding: 50px 0 50px 0">
+        <div class="col-md-6">
+            <h2>Signal Extraction</h2>
+            This element includes all the necessary steps leading to <strong>features</strong> detection. It may involves:
+                <ul class="list-group">
+                    <li class="list-group-item">Smoothing</li>
+                    <li class="list-group-item">Baseline removal</li>
+                    <li class="list-group-item">Spectra peak picking (centroiding)</li>
+                    <li class="list-group-item">Elution peak detection</li>
+                </ul>
+        </div>
+        <div class="col-md-6">
+
+            <img src="{{ url_for('static', filename='img/lcms_map2.png') }}">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="padding: 50px 0 50px 0">
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='img/alignment2.jpg') }}">
+        </div>
+        <div class="col-md-6">
+            <h2>LC Alignment</h2>
+            The goal of the Map Alignment analysis is to correct retention times drifts of LC-MS runs against a reference
+            in order to correctly match features between those different LC-MS runs.
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="padding: 50px 0 50px 0">
+        <div class="col-md-6">
+            <h2>Database Search</h2>
+            <ul class="list-group">
+                <li class="list-group-item">Isotopes/adducts annotation</li>
+                <li class="list-group-item">Database identification</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='img/hmdb.jpg') }}">
+            <img src="{{ url_for('static', filename='img/metlin.jpg') }}">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="padding-top: 50px">
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='img/systrip.png') }}">
+
+        </div>
+        <div class="col-md-6">
+            <h2>Statistical analysis</h2>
+            <ul class="list-group">
+                <li class="list-group-item">Differential analysis</li>
+                <li class="list-group-item">Univariate/multivariate analysis</li>
+                <li class="list-group-item">Machine learning</li>
+                <li class="list-group-item">Pathway mapping and analysis</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}

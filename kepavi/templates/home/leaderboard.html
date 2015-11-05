@@ -1,0 +1,54 @@
+{% extends theme("layout.html") %}
+
+
+{% block title %}
+    Leaderboard - Metabomatch
+{% endblock %}
+
+{% block keywords %}
+    <meta name="keywords" content="omics services, metabolomics, users, leaderboard">
+    <meta name="description" content="Shows all registered users on Metabomatch classified by score">
+{% endblock %}
+
+{% block content %}
+    <h3 class="text-left">Leaderboard</h3>
+    <p class="help-block"> <strong>Increase your global score and compare to others</strong><br/>
+        Post scripts, comments, jobs and new softwares !
+    </p>
+
+    <hr/>
+    <div class="row">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>rank</th>
+                    <th>Username</th>
+                    <th>Join date</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    {% if user.username != 'Guest' %}
+                        <tr {% if user.id == current_user.id %} class="info"{% endif %}>
+                            <th><strong>{{ loop.index }}</strong></th>
+                            <th>
+                                {% if user.avatar %}
+                                    <img class='img-rounded' src="{{ user.avatar }}" alt="gravatar" height="30"
+                                         width="30">
+                                {% else %}
+                                    <img class='img-rounded' src="{{ user.email | gravatar }}" alt="gravatar"
+                                         height="30"
+                                         width="30">
+                                {% endif %} <a
+                                    href="{{ url_for('user.profile', username=user.username) }}">{{ user.username }}</a>
+                            </th>
+                            <th>{{ user.date_joined | format_date }}</th>
+                            <th>{{ user.global_score }}</th>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
