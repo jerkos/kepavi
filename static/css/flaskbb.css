@@ -63,9 +63,7 @@ body {
     border: 1px solid #B6B6B6;
 }
 
-.main-sidebar {
-
-}
+.main-sidebar {}
 
 .sidebar-menu {
     background-color: #FFFFFF;
@@ -81,15 +79,15 @@ body {
 .sidebar-menu .nav li a {
     color: #212121;
     text-decoration: none;
-    transition: all 0.2s linear;
+    /*transition: all 0.2s linear;*/
 }
 
 .sidebar-menu .nav li a:hover {
-    border-bottom: 2px solid #7C4DFF;
+    border-left: 2px solid #7C4DFF;
 }
 
 .brand {
-    background-color: #03A9F4;
+    background-color: #0288D1; /*#03A9F4;*/
     font-size: 1.2em;
     color: #B3E5FC;
     padding: 0.8em 0;

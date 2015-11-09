@@ -6,22 +6,38 @@ import tempfile
 import os
 from itertools import groupby
 from collections import defaultdict
+import random
+
+# Sigma js has my preference since it can handle
+# larger graph
+GRAPH_LIBRARY_BACKEND = {'cytoscape', 'sigma'}
 
 
 def get_sbml_from_s3(url):
     """
-    load model stored in AWS S3 service
-    :param url:
-    :return:
+    load model stored in AWS S3 service using requests
+    library.
+    :param url: url to fetch
+    :return: cobra model object could be None
     """
+
     resp = requests.get(url)
     if resp.status_code != 200:
         return None
     name = 'sbml.xml'
-    with open('sbml.xml', 'w') as f:
+    # with tempfile.NamedTemporaryFile(delete=False) as f:
+    with open(name, 'w') as f:
         f.write(resp.text.encode('utf-8'))
-    sbml_model = cobra.io.read_sbml_model(name)
+
+    sbml_model = None
+    try:
+        sbml_model = cobra.io.read_sbml_model(name)
+    except Exception:
+        pass
+
+    # remove file
     os.remove(name)
+
     return sbml_model
 
 
@@ -32,16 +48,13 @@ def _launch_fba(model, objectives, user_params, optimize_sense='maximize'):
 
     :param model: cobrapy model
     :param objectives: reactions list representing objectives function
-    :param user_params: list of dict reactions bounds that has been changed by user
+    :param user_params: list of dict reactions bounds that has been changed 
+                        by user
     :return: solution object
 
     """
 
     def get_reac_by_name(name):
-
-        # escaping parenthesis
-        # name = name.replace('(', '\(')
-        # name = name.replace(')', '\)')
 
         reacts = model.reactions.query(lambda x: True if x == name else False, 'name')
         try:
@@ -70,60 +83,88 @@ def _launch_fba(model, objectives, user_params, optimize_sense='maximize'):
     return solution
 
 
-def _add_node(data, node_id, klass, name, position, bg_color, shape='ellipse', show_compound_img=False):
+def _add_node(data,
+              node_id,
+              klass,
+              name,
+              position,
+              bg_color,
+              shape='ellipse',
+              show_compound_img=False, 
+              backend='sigma'):
+    
     """
     css properties are not applied when they are in snakeCase.
     :param entry:
     :param data: dictionnary containing graph
     :return:
+
     """
 
+    if backend not in GRAPH_LIBRARY_BACKEND:
+        raise NameError('backend library not in {cytoscape, sigma}')
+
     node_data = {'id': node_id,
-                 'name': name,
-                 'content': name,
-                 # reactions labeled are centered by default
-                 'textValign': 'top',
-                 'width': 10,
-                 'height': 10,
-                 'backgroundColor': bg_color,
-                 'type': shape,
-                 'borderColor': '#000000',
-                 'borderWidth': 4,
-                 # 'backgroundImage': 'none',
-                 # 'backgroundFit': 'cover',
-                 # 'backgroundClip': 'none'
+                 #'name': name,
+                 'label': name,
+                 'size': 5,
+                 'x': position.x if position is not None else random.random(),
+                 'y': position.y if position is not None else random.random()
+                 #'content': name,
+                 #'textValign': 'top',
+                 #'width': 10,
+                 #'height': 10,
+                 #'backgroundColor': bg_color,
+                 #'type': shape,
+                 #'borderColor': '#000000',
+                 #'borderWidth': 4
                  }
 
-    data['nodes'].append(
-        {
-            'data': node_data,
-            # 'position':
-            #     {'x': graphics.x,
-            #      'y': graphics.y},
-            # 'locked': True,
-            'grabbable': True,
-            'selectable': True,
-            'classes': klass
-        }
-    )
+    # if backend == 'sigma':
+    #     node_data.update(
+    #         {
+    #             'x': position.x if position is not None else random.random(),
+    #             'y': position.y if position is not None else random.random()
+    #         }
+    #     )
+    
+    if backend == 'sigma':
+        data['nodes'].append(node_data)
+    else:
+        data['nodes'].append(
+            {
+                'data': node_data,
+                'position':
+                    {'x': position[0],
+                     'y': position[1]},
+                'grabbable': True,
+                'selectable': True,
+                'classes': klass
+            }
+        )
 
 
-def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True):
+def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True, backend='sigma'):
     concat = '-'.join([str(id1), str(id2)])
-    data['edges'].append(
-        {
-            'data':
-                {'id': reaction.id if reaction is not None else concat,
-                 'content': reaction.name if reaction is not None else 'NA',
+    edge_data = {'id': reaction.id if reaction is not None else concat,
+                 #'content': reaction.name if reaction is not None else 'NA',
                  'source': id1,
                  'target': id2,
-                 'targetArrowShape':  'triangle' if arrow_target else 'none',
-                 'sourceArrowShape':  'triangle' if arrow_src else 'none',
-                 'flux': flux,
-                 'absflux': abs(flux)
-                 },
-         }
-    )
+                 #'size': 5,
+                 #'color': '#ccc'
+                 #'targetArrowShape':  'triangle' if arrow_target else 'none',
+                 #'sourceArrowShape':  'triangle' if arrow_src else 'none',
+                 #'flux': flux,
+                 #'absflux': abs(flux)
+                }
+    if backend == 'cytoscape':
+        data['edges'].append(
+            {
+                'data': edge_data
+            }
+        )
+    else:
+        data['edges'].append(edge_data)
 
 
 def _build_genome_scale_network(model, results):
@@ -131,8 +172,10 @@ def _build_genome_scale_network(model, results):
 
     x_dict = results['x_dict']
 
+    metabolites_ids = set()
     for m in model.metabolites:
-        if m.name in ('H',
+        if m.name in {'H',
+                      'H+',
                       'H2O',
                       'ADP',
                       'ATP',
@@ -144,21 +187,16 @@ def _build_genome_scale_network(model, results):
                       'Nicotinamide-adenine-dinucleotide-phosphate',
                       'Nicotinamide-adenine-dinucleotide--reduced',
                       'Ammonium',
-                      'CO2') or m.compartment == 'e':
+                      'CO2'} or m.compartment == 'e':
             continue
         # data, node_id, name, position, bg_color, shape='ellipse', show_compound_img=False
+        # data, node_id, klass, name, position, bg_color, shape='ellipse', show_compound_img=False
         _add_node(data, m.id, 'metabolite', m.name, None, '#FFFFFF')
+        metabolites_ids.add(m.id)
     for r in model.reactions:
-        # _add_node(data, r.id, 'reaction', r.name, None, '#FFFFFF')
-        #for reactant in r.reactants:
-        # if r.reversibility:
-        #     for reactant in r.reactants:
-        #         _add_edge(data, r.id, reactant.id, x_dict[r.id])
-        #
-        # for p in r.products:
-        #     _add_edge(data, r.id, p.id, x_dict[r.id])
         if r.reactants and r.products:
-            _add_edge(data, r.reactants[0].id, r.products[0].id, x_dict[r.id])
+            if r.reactants[0].id in metabolites_ids and r.products[0].id in metabolites_ids: 
+                _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
     return data
 
 
@@ -175,14 +213,23 @@ def find_reactions(reactants_kegg_id, products_kegg_id, kegg_ids_by_reac_id):
     return frozenset(matches[max_match])
 
 
-def build_kegg_network_mixed(pathway, kegg_model_name, sbml_model, results):
-    """Build network using sbml_model, kegg model and results
+def build_kegg_network_mixed(pathway,
+                             kegg_model_name,
+                             sbml_model,
+                             results):
+    """
+    Build network using sbml_model, kegg model and results
+    We use the kegg_model to get the layout
+    Basically, this will be used when the user requests a graph
+    of a specific pathway.
 
     """
 
-    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate', 'Phosphate', 'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
-                  'Dihydroxyacetone-phosphate', 'Nicotinamide-adenine-dinucleotide', 'Acetyl-CoA',
-                  'Nicotinamide-adenine-dinucleotide-phosphate', 'Nicotinamide-adenine-dinucleotide--reduced',
+    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate',
+                  'Phosphate', 'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
+                  'Dihydroxyacetone-phosphate', 'Nicotinamide-adenine-dinucleotide',
+                  'Acetyl-CoA', 'Nicotinamide-adenine-dinucleotide-phosphate',
+                  'Nicotinamide-adenine-dinucleotide--reduced',
                   'Ammonium', 'CO2')
 
     def get_kegg_id(element):
@@ -303,26 +350,31 @@ def build_kegg_network_mixed(pathway, kegg_model_name, sbml_model, results):
     return data
 
 
-def build_kegg_network(sbml_model, results):
+def build_cobra_network(sbml_model, results):
     """
+    graph based on the sbml model only, i.e. all the
+    reactions containing products and reactants
 
     :param sbml_model:
     :param results:
     :return:
     """
-    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate', 'Phosphate', 'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
-                  'Dihydroxyacetone-phosphate', 'Nicotinamide-adenine-dinucleotide', 'Acetyl-CoA'
-                  'Nicotinamide-adenine-dinucleotide-phosphate', 'Nicotinamide-adenine-dinucleotide--reduced',
+
+    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate', 'Phosphate',
+                  'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
+                  'Dihydroxyacetone-phosphate',
+                  'Nicotinamide-adenine-dinucleotide',
+                  'Acetyl-CoA', 'Nicotinamide-adenine-dinucleotide-phosphate',
+                  'Nicotinamide-adenine-dinucleotide--reduced',
                   'Ammonium', 'CO2')
 
-    # fluxes = results['x_dict'].values()
-    fluxes = [results['x_dict'][_.id] for _ in sbml_model.reactions if _.subsystem == 'GlycolysisGluconeogenesis']
+    fluxes = [results['x_dict'][_.id] for _ in sbml_model.reactions]
     flux_min, flux_max = min(fluxes), max(fluxes)
-    data = {'nodes': [], 'edges': [], 'flux_min': flux_min, 'flux_max': flux_max}
+    data = {'nodes': [], 'edges': []}
 
     added_node = set()
 
-    id_by_name = {} # defaultdict(set)
+    id_by_name = {}
 
     def add_node(elements):
         for e in elements:
@@ -333,11 +385,9 @@ def build_kegg_network(sbml_model, results):
             if e_name not in added_node:
                 added_node.add(e_name)
                 id_by_name[e_name] = e_id
-                _add_node(data, e_id, 'metabolites', e.name, None, '#000000')
+                Kegg._add_node(data, e_id, 'metabolites', e.name, None, '#000000')
 
     for reaction in sbml_model.reactions:
-        if reaction.subsystem != 'GlycolysisGluconeogenesis':
-            continue
         add_node(reaction.reactants)
         add_node(reaction.products)
         for reactant in reaction.reactants:

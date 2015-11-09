@@ -5,13 +5,18 @@ import sqlite3
 
 from Bio.KEGG.KGML.KGML_parser import read as kgml_read
 from Bio.KEGG.KGML.KGML_pathway import Entry, Component, Reaction, Relation
-from flask import jsonify
 
 from kepavi.extensions import db
 import requests
 
 
 class Organism(db.Model):
+    """
+    Organism defines in Kegg organism database
+    scrapped using get requests using REST Api
+
+    """
+
     __tablename__ = "organism"
 
     code = db.Column(db.String(15), primary_key=True)
@@ -48,11 +53,21 @@ class Kegg(object):
 
     @staticmethod
     def get_org_list():
+        """
+        return all organism listed in Kegg database
+        """
+
         resp = requests.get(''.join([Kegg.BASE_URL, 'list/organism']))
         return resp.text
 
     @staticmethod
     def get_pathways_list(org='hsa'):
+        """
+        return all pathway for an organism listed in Kegg
+        database
+        :param org organism shortcode in Kegg database
+        """
+
         resp = requests.get(''.join([Kegg.BASE_URL, 'list/pathway/', org]))
         if resp.status_code == 200:
             d = csv.DictReader(resp.text.split('\n'), delimiter='\t', fieldnames=('id', 'name'))
@@ -60,81 +75,43 @@ class Kegg(object):
         return {}
 
     @staticmethod
-    def get_kgml(pathway_id):
+    def get_kgml_obj(pathway_id):
+        """
+        return Kegg KGML_pathway object
+        :param pathway_id pathway id in the kegg database
+               could be None if request failed
+        """
+
         if pathway_id.startswith('path:'):
             pathway_id = pathway_id.replace('path:', '')
-        resp = requests.get(''.join([Kegg.BASE_URL, 'get/', pathway_id, '/kgml']))
+        resp = requests.get(''.join([Kegg.BASE_URL,
+                                     'get/',
+                                     pathway_id,
+                                     '/kgml']))
         if resp.status_code == 200:
             return kgml_read(resp.text)
         return None
 
     @staticmethod
-    def get_kgml_network(pathway_id, show_compounds_img=False):
-        if pathway_id.startswith('path:'):
-            pathway_id = pathway_id.replace('path:', '')
-        resp = requests.get(''.join([Kegg.BASE_URL, 'get/', pathway_id, '/kgml']))
-        if resp.status_code == 200:
-            # start building graph
-
-            data = {'nodes': [], 'edges': []}
-            pathway = kgml_read(resp.text)
-
-            cpd_names_by_cpd_ids = Kegg._fetch_compounds_name()
-
-            for entry_id, entry in pathway.entries.iteritems():
-                entry_type = entry.type
-                # if we only focus on the metabolic network, we remove
-                # map and ortholog entries since it is getting more
-                # obfuscated with it.
-                if entry_type in {'ortholog', 'map', 'enzyme', 'group'}:
-                    continue
-                Kegg._add_node(data, entry)
-
-            for reaction in pathway.reactions:
-                reac_id = reaction.id
-
-                for substrate in reaction.substrates:
-                    substrate_id = substrate.id
-                    if reaction.type == 'reversible':
-                        Kegg._add_edge(data, substrate_id, reac_id, arrow_src=True, arrow_target=False)
-                    else:
-                        Kegg._add_edge(data, substrate_id, reac_id, arrow_src=False, arrow_target=False)
-                for product in reaction.products:
-                    Kegg._add_edge(data, reac_id, product.id, arrow_src=False, arrow_target=True)
-
-            # for relation in pathway.relations:
-            #     if relation.type == 'maplink':
-            #         continue
-            #     relation_types = {relation.entry1.type, relation.entry2.type}
-            #     if 'compound' in relation_types and 'ortholog' in relation_types:
-            #         continue
-            #     _add_edge(relation.entry1.id, relation.entry2.id)
-
-            return data
-        return []
-
-    @staticmethod
-    def _add_node(data, entry, name=None, show_compound_img=False):
+    def _add_node(data, entry, name=None, show_compound_img=False, backend='sigma'):
         """
         css properties are not applied when they are in snakeCase.
         :param entry:
         :param data: dictionnary containing graph
         :return:
         """
+
+        if backend not in {'sigma', 'cytoscape'}:
+            raise ValueError('backend value must be in {cytoscape, sigma}')
+
         entry_type = entry.type
         graphics = entry.graphics[0]
-
-        # if entry_type == 'gene':
-        #     name = entry.reaction.split(' ')[0][3:]
-        # elif entry_type == 'compound':
-        #     name = graphics.name  # cpd_names_by_cpd_ids.get(graphics.name, graphics.name)
-        # else:
-        #     name = graphics.name
 
         node_name = name or graphics.name
 
         node_data = {'id': entry.id,
                      'name': node_name,
+                     'label': node_name,
                      'content': node_name,
                      # reactions labeled are centered by default
                      'textValign': 'center' if entry_type == 'gene' else 'top',
@@ -156,32 +133,48 @@ class Kegg(object):
                 # 'background-fit': 'cover',
                 # 'background-clip': 'none'
             })
+        if backend == 'sigma':
+            node_data.update(
+                {
+                    'x': graphics.x,
+                    'y': graphics.y
+                }
+            )
 
-        data['nodes'].append(
-            {
-                'data': node_data,
-                'position':
-                    {'x': graphics.x,
-                     'y': graphics.y},
-                # 'locked': True,
-                'grabbable': True
-            }
-        )
+        if backend == 'cytoscape':
+            data['nodes'].append(
+                {
+                    'data': node_data,
+                    'position':
+                        {'x': graphics.x,
+                         'y': graphics.y},
+                    # 'locked': True,
+                    'grabbable': True
+                }
+            )
+        else:
+            # sigma js
+            data['nodes'].append(node_data)
 
     @staticmethod
-    def _add_edge(data, id1, id2, arrow_src=False, arrow_target=True):
+    def _add_edge(data, id1, id2, arrow_src=False, arrow_target=True, backend='sigma'):
         concat = '-'.join([str(id1), str(id2)])
-        data['edges'].append(
-            {
-                'data':
-                    {'id': concat,
+        edge_data = {'id': concat,
                      'source': id1,
                      'target': id2,
                      'targetArrowShape':  'triangle' if arrow_target else 'none',
                      'sourceArrowShape':  'triangle' if arrow_src else 'none'
-                     },
-             }
-        )
+                     }
+        if backend == 'cytoscape':
+            data['edges'].append(
+                {
+                    'data': edge_data,
+                }
+            )
+        else:
+            # sigmajs
+            data['edges'].append(edge_data)
+
 
     @staticmethod
     def _fetch_compounds_name(pathway=None):

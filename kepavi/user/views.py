@@ -11,13 +11,14 @@
 """
 import json
 import logging
-import cobra
-from kepavi.biomodels import BiomodelMongo
-from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba, build_kegg_network, build_kegg_network_mixed
+# import cobra
+# from kepavi.biomodels import BiomodelMongo
+from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba, build_kegg_network_mixed, _build_genome_scale_network
 from kepavi.kegg_utils import Kegg, Organism
 from kepavi.utils import s3_upload_from_server
+from kepavi.private_keys import S3_URL
 import os
-from datetime import datetime
+# from datetime import datetime
 
 from kepavi.user.forms import CreateProjectForm, CreateFBAAnalysisForm
 from kepavi.user.models import Project, Analysis, User, Biomodel
@@ -26,17 +27,10 @@ import requests
 from flask import Blueprint, flash, request, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
-from kepavi.extensions import db
 from requests.packages.urllib3.exceptions import ConnectionError
 
-try:
-    from kepavi.private_keys import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, S3_URL
-except ImportError:
-    TWITTER_CONSUMER_SECRET = os.environ.get('TWITTER_CONSUMER_SECRET')
-    TWITTER_CONSUMER_KEY = os.environ.get('TWITTER_CONSUMER_KEY')
 
-
-user = Blueprint("user", __name__, template_folder="templates")
+user = Blueprint("user", __name__, template_folder="../templates")
 
 
 @user.route("/<username>")
@@ -63,6 +57,7 @@ def create_project(username):
         p = Project(title=form.title.data, user_id=current_user.id)
         p.save()
         return redirect(url_for('user.profile', username=current_user.username))
+    return render_template('errors/server_error.html')
 
 
 @user.route('/<username>/<int:project_id>-<slug>/create_fba_analysis')
@@ -125,14 +120,14 @@ def launch_fba(username):
     if sbml_model is None:
         return render_template('errors/server_error.html')
 
-    # sbml_model = get_sbml_from_s3(model.url)
-
-    solution = _launch_fba(sbml_model, data['objective_functions'], data['constraints'])
+    solution = _launch_fba(sbml_model,
+                           data['objective_functions'],
+                           data['constraints'])
 
     # create analysis object
     a = Analysis(title=data['title'],
                  kind=Analysis.KIND[0],
-                 model_id = model.id,
+                 model_id=model.id,
                  project_id=project_id)
     a.results_content = solution.status
     a.serialized_properties = json.dumps(data)
@@ -176,6 +171,10 @@ def launch_fba(username):
 @user.route("/<username>/visualize/<int:analysis_id>")
 @login_required
 def visualize_fba_analysis(username, analysis_id):
+    """
+    main endpoint to visualize flux balance analysis
+
+    """
     analysis = Analysis.query.filter(Analysis.id == analysis_id).first_or_404()
 
     # retrieve file data from s3
@@ -186,12 +185,14 @@ def visualize_fba_analysis(username, analysis_id):
     if resp.status_code != 200:
         return render_template('errors/server_error.html'), 500
 
-    # model = get_sbml_from_s3(analysis.model.url)
-    # results = json.loads(resp.text)
-    # data = _build_cytoscape_network(model, results)
-
     orgs = Organism.query.order_by(Organism.tax).all()
-    return render_template('user/fba_analysis.html', analysis=analysis, organisms=orgs)
+
+    model = analysis.model
+    model_name = model.name
+    pathways = Kegg.get_pathways_list(org=model.kegg_org)
+    return render_template('user/fba_analysis.html', analysis=analysis,
+                           organisms=orgs, model_name=model_name,
+                           pathways=pathways)
 
 
 @user.route('/<username>/get_kegg_pathways', methods=['GET'])
@@ -205,7 +206,11 @@ def get_kegg_pathways(username):
 @user.route('/<username>/get_kgml', methods=['GET'])
 @login_required
 def get_kgml(username):
-
+    """
+    main function to visualize network
+    return json encoded graph
+    """
+    
     pathway_id = request.args.get('pathway_id')
     if pathway_id is None:
         return json.dumps([])
@@ -227,15 +232,21 @@ def get_kgml(username):
     results = json.loads(resp.text)
 
     # get the sbml model
-    model = analysis.model.get_cobra_model() # get_sbml_from_s3(analysis.model.url)
+    model = analysis.model.get_cobra_model()
     if model is None:
         return render_template('errors/server_error.html')
-    kegg_model = Kegg.get_kgml(pathway_id)
 
-    if model is None or kegg_model is None:
-        return render_template('errors/page_not_found.html'), 404
+    if pathway_id == 'whole':
+        # whole drawing requested
+        cytoscape_formatted = _build_genome_scale_network(model, results)
 
-    kegg_model_name = request.args.get('pathway_name')
+    else:
+        kegg_model = Kegg.get_kgml_obj(pathway_id)
+ 
+        if model is None or kegg_model is None:
+            return render_template('errors/page_not_found.html'), 404
 
-    cytoscape_formatted = build_kegg_network_mixed(kegg_model, kegg_model_name, model, results)
+        kegg_model_name = request.args.get('pathway_name')
+        cytoscape_formatted = build_kegg_network_mixed(kegg_model, kegg_model_name, model, results)
+
     return json.dumps(cytoscape_formatted)

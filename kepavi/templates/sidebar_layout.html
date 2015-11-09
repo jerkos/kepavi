@@ -13,24 +13,24 @@
         </title>
 
         {% block keywords %}
-            <meta name="keywords" content="omics services, metabolomics, software, ranking, best, number one, scripts, parameters">
-            <meta name="description" content="Metabomatch is a website for comparing metabolomics softwares and helps choosing the best one for your needs.">
+            <meta name="keywords" content="omics services, metabolomics, software">
+            <meta name="description" content="{{current_user.username}} fluxomics, metabolomics projects ">
         {% endblock %}
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="Marc Dubois">
 
-        <meta property="og:site_name" content="Metabomatch"/>
-        <meta property="og:title" content="Metabomatch"/>
+        <meta property="og:site_name" content="Kepavi"/>
+        <meta property="og:title" content="Kepavi"/>
         <meta property="og:type" content="article"/>
         <meta property="og:description"
-              content="Metabomatch is a website for comparing metabolomics softwares and helps choosing the best one for your needs."/>
+              content="Kepavi is a web service for doing metabolomics and fluxomics."/>
         <meta property="og:locale" content="en_US"/>
-        <meta property="og:url" content="http://www.metabomatch.com/"/>
+        <meta property="og:url" content="http://www.kepavi.com/"/>
 
         <meta property="twitter:card" content="summary_large_image"/>
-        <meta property="twitter:site" content="@metabomatch"/>
-        <meta property="twitter:creator" content="@metabomatch"/>
+        <meta property="twitter:site" content="@kepavi"/>
+        <meta property="twitter:creator" content="@kepavi"/>
 
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
 
@@ -42,7 +42,6 @@
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
             <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" >
-{#            <link rel="stylesheet" href="{{ url_for('static', filename='css/code.css') }}">#}
             <link rel="stylesheet" href="{{ url_for('static', filename='css/flaskbb.css') }}">
             <!-- overriding container size !-->
             <style>
@@ -51,16 +50,6 @@
                 }
             </style>
         {% endblock %}
-
-{#        GA script#}
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-          ga('create', 'UA-46475206-5', 'auto');
-          ga('send', 'pageview');
-        </script>
     </head>
 
     <body>
@@ -79,9 +68,11 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                   <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('home.index') }}#prices">Prices</a></li>
-                    <li><a href="#Doc">Doc</a></li>
-                    <li><a href="#">Contact</a></li>
+                    <li><a href="{{ url_for('home.index') }}#prices"><span class="fa fa-map"></span> Projects</a></li>
+                    <li><a href="{{ url_for('home.index') }}#doc"><span class="fa fa-map-marker"></span> Doc</a></li>
+                  </ul>
+                  <ul class="nav pull-right">
+                    <li><a href="#"><span class="fa fa-sign-out"></span> logout</a></li>
 
                   </ul>
                 </div><!--/.nav-collapse -->
@@ -95,7 +86,7 @@
         <div id="wrap">
             <div class="container" >
                 <div class="row">
-                    <div class="col-md-2 main-sidebar">
+                    <div class="col-md-3 main-sidebar">
                         <div class="sidebar-menu">
                             <ul class="nav nav-stacked">
                                 <li class="brand">
@@ -126,24 +117,24 @@
                                 </li>
                                 <li data-toggle="tooltip" data-placement="right" title="Perform flux analyses using CobraPy"><a href="#">Flux analysis</a></li>
                             </ul>
-                            {%  if current_user.is_authenticated() %}
+                            <!-- {%  if current_user.is_authenticated() %}
                                 <a style="margin-top: 50px;" href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-block">Logout</a>
                             {% else %}
                                 <a style="margin-top: 50px;" href="{{ url_for('auth.login') }}" class="btn btn-primary btn-block">Login</a>
-                            {% endif %}
+                            {% endif %} -->
                         </div>
                         <div class="sidebar-stats">
                             <ul class="nav nav-stacked">
                                 <li class="sidebar-title"><strong>Statistics</strong></li>
                                 <li class="divider"></li>
                                 <li><strong><span class="fa fa-users text-muted"></span> Users:</strong> <em>65</em></li>
-                                <li><strong><span class="fa fa-briefcase"></span> Projects:</strong> <em>456</em></li>
-                                <li><strong><span class="fa fa-flask"></span> Metabolites:</strong> <em>1598864</em></li>
+                                <li><strong><span class="fa fa-briefcase text-muted"></span> Projects:</strong> <em>456</em></li>
+                                <li><strong><span class="fa fa-flask text-muted"></span> Metabolites:</strong> <em>1598864</em></li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="col-md-10">
+                    <div class="col-md-9">
                          {% block messages %}
                              {% include 'flashed_messages.html' %}
                          {% endblock %}

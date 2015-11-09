@@ -46,43 +46,22 @@
 
 {% block content %}
 
-{#    modal #}
-{#    <div class="modal fade" id="myModal">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#              <div class="modal-header">#}
-{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                <h4 class="modal-title">Flux balance analysis launched</h4>#}
-{#              </div>#}
-{#              <div class="modal-body">#}
-{#                <p class="text-center">Loading ...</p>#}
-{#                <p class="text-center"> <img src="{{ url_for('static', filename='img/hex-loader2.gif') }}" height="100" alt="loader"></p>#}
-{#              </div>#}
-{#              <div class="modal-footer">#}
-{#                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>#}
-{#              </div>#}
-{#            </div><!-- /.modal-content -->#}
-{#        </div><!-- /.modal-dialog -->#}
-{#    </div><!-- /.modal -->#}
-
     <div class="row">
         <h1>Create new Flux Balance Analysis</h1>
         <hr/>
     </div>
 
-    <div class="alert alert-info">
-        <p>Sbml models must have Kegg informations IDs for reactions and metabolites (in their <code>notes</code> tag)in order to have a proper
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <p style="font-size:0.8em;">Sbml models must have Kegg informations IDs for reactions and metabolites (in their <code>notes</code> tag)in order to have a proper
         visualization respecting Kegg maps layout. To see proper example, see those models taken from
         <a href="http://www.ebi.ac.uk/biomodels-main">Biomodels</a>.</p>
     </div>
 
     <form id="my-crazy-form">
         {{ form.hidden_tag() }}
-{#        method="post" action="{{ url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug) }}">#}
 
-        <div class="row" style="padding: 0 15%;">
-{#            style="width:100%;">#}
-{#            <div class="col-md-8">#}
+        <div class="row" style="padding: 0 5%;">
                 <h2 class="purple">1. Informations</h2>
                 <hr>
 
@@ -133,37 +112,25 @@
                         <option>minimize</option>
                     </select>
                 </div>
-{#                <div class="form-group {%- if form.reactions.errors %} has-error{%- endif %}">#}
-{#                    <label for="reactions">Choose reactions to optimize:</label><br/>#}
-{#                    <select name="reactions" multiple required disabled class="reactions-selector form-control">#}
-{#                        <option disabled selected>select a model...</option>#}
-{##}
-    {#                        {% for k, v in form.model.choices %}#}
-    {#                            <option value="{{ k }}">{{ v }}</option>#}
-    {#                        {% endfor %}#}
-{#                    </select>#}
-{#                    {{ field_description(form.reactions) }}#}
-{#                    {{ field_errors(form.reactions) }}#}
-{#                </div>#}
-{#                <div class="form-group">#}
-{#                    <label for="optimize-sense">Omptimization sense</label><br/>#}
-{#                    <select name="optimize-sense" required class="form-control">#}
-{#                        <option selected value="maximize">maximize</option>#}
-{#                        <option value="minimize">minimize</option>#}
-{#                    </select>#}
-{#                </div>#}
-
 
             </div>
-            <div class="row" style="padding: 0 15%;">
-{#            <div class="col-md-12">#}
+            <div class="row" style="padding: 0 5%;">
                 <h2 class="purple">2. Modify constraints</h2>
                 <hr>
-                <p class="help-block">You can change constraints applied to the model. Just select a reaction and
+                <p class="help-block" style="font-size:0.8em;">You can change constraints applied to the model. Just select a reaction and
                     click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
                     signify more uptake. <a href="#">For more informations follow our tutorial</a></p>
+               {#  <div class="form-group {%- if form.model.errors %} has-error{%- endif %}">
+                    <label for="model">Select reactions to constraint:</label><br/>
+
+                    <select disabled class="constraint-selector form-control" style="width:70%;">
+                        <option disabled selected>select a reaction...</option>
+                    </select>
+                    <button id="modify-constraint" class="btn btn-info">Modify reaction constraint</button><br/>
+                    <span id="constraint-errors" class=text-danger></span>
+                </div> #}
                 <div class="container">
-                    <div class="row">
+                     <div class="row">
                         <div class="col-md-9">
                             <select disabled class="constraint-selector form-control">
                                 <option disabled selected>select a constraint...</option>
@@ -187,7 +154,6 @@
                     </tbody>
                 </table>
             </div>
-{#        </div>#}
         <div class="row text-center" style="padding-top: 50px;">
                 <div class="form-group">
                         <button id="submit" type="submit" class="btn btn-lg btn-info">Start FBA</button>

@@ -22,7 +22,7 @@ except ImportError:
     TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET = None, None
 
 
-auth = Blueprint("auth", __name__, template_folder="templates")
+auth = Blueprint("auth", __name__, template_folder="../templates")
 
 
 # Use Twitter as example remote application
@@ -60,9 +60,9 @@ def login():
                                                 form.password.data)
         if user and authenticated:
             # remove this key when a user is authenticated
-            session.pop('nb_views', None)
+            # session.pop('nb_views', None)
             login_user(user, remember=form.remember_me.data)
-            flash("Successfully logged", "success")
+            flash("Welcome onboard {} !".format(user.username), "success")
             return redirect(request.args.get("next") or url_for("user.profile", username=user.username))
 
         flash("Wrong username or password", "danger")
