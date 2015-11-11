@@ -1,12 +1,9 @@
 import json
 
-from flask import Blueprint, url_for, redirect, render_template, request, jsonify
+from flask import Blueprint, render_template, request
+
 from kepavi.auth.forms import LoginForm
 from kepavi.kegg_utils import Organism, Kegg
-from sqlalchemy import desc
-
-from kepavi.extensions import db
-from kepavi.user.models import User
 
 
 home = Blueprint('home', __name__, template_folder='../templates')

@@ -127,7 +127,7 @@ def _add_node(data,
     #             'y': position.y if position is not None else random.random()
     #         }
     #     )
-    
+
     if backend == 'sigma':
         data['nodes'].append(node_data)
     else:
@@ -150,7 +150,13 @@ def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True
                  #'content': reaction.name if reaction is not None else 'NA',
                  'source': id1,
                  'target': id2,
-                 #'size': 5,
+                 'size': 1,
+                 'type': 'curvedArrow',
+                 'data': 
+                    {
+                        'flux': flux,
+                        'reversible': reaction.reversibility
+                    }
                  #'color': '#ccc'
                  #'targetArrowShape':  'triangle' if arrow_target else 'none',
                  #'sourceArrowShape':  'triangle' if arrow_src else 'none',
@@ -176,6 +182,7 @@ def _build_genome_scale_network(model, results):
     for m in model.metabolites:
         if m.name in {'H',
                       'H+',
+                      'H(+)',
                       'H2O',
                       'ADP',
                       'ATP',

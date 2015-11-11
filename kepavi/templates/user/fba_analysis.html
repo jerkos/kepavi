@@ -17,18 +17,43 @@
             display: none;
         }
 
+        /*.main-sidebar {
+            display: none;
+        }*/
+
         .load-cytoscape-btn {
-            margin-top: 50px;
+            /*margin-top: 50px;*/
         }
 
         #cytoscape-container {
-            height:100%;
+            /*height:100%;*/
+            width:100%;
+            overflow: hidden;
+            background-color: #2c3e50;
         }
 
-    hr {
-        border: 1px solid white;
-{#        border: 1px solid black;#}
-    }
+        hr {
+            border: 1px solid white;
+        }
+
+        #settings-nav {
+            position: fixed;
+            right: 0;
+            max-width: 20%;
+            background-color: white;
+            border-radius: 5px;
+            z-index: 25;
+        }
+
+        #setting-nav-shower {
+            display: none;
+            position:fixed;
+            right:0;
+            background-color: white;
+            border-radius: 5px;
+            z-index: 25;
+        }
+
         #centered-loader {
             position:absolute;
             top: 50%;
@@ -40,6 +65,90 @@
         }
 
         .help-block { font-size: 0.8em;}
+
+        .sigma-tooltip {
+          max-width: 240px;
+          max-height: 280px;
+          background-color: rgb(249, 247, 237);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          border-radius: 6px;
+        }
+
+        .sigma-tooltip-header {
+          font-variant: small-caps;
+          font-size: 120%;
+          color: #437356;
+          border-bottom: 1px solid #aac789;
+          padding: 10px;
+        }
+
+        .sigma-tooltip-body {
+          padding: 10px;
+        }
+
+        .sigma-tooltip-body th {
+          color: #999;
+          text-align: left;
+        }
+
+        .sigma-tooltip-footer {
+          padding: 10px;
+          border-top: 1px solid #aac789;
+        }
+
+        .sigma-tooltip > .arrow {
+          border-width: 10px;
+          position: absolute;
+          display: block;
+          width: 0;
+          height: 0;
+          border-color: transparent;
+          border-style: solid;
+        }
+
+        .sigma-tooltip.top {
+          margin-top: -12px;
+        }
+        .sigma-tooltip.top > .arrow {
+          left: 50%;
+          bottom: -10px;
+          margin-left: -10px;
+          border-top-color: rgb(249, 247, 237);
+          border-bottom-width: 0;
+        }
+
+        .sigma-tooltip.bottom {
+          margin-top: 12px;
+        }
+        .sigma-tooltip.bottom > .arrow {
+          left: 50%;
+          top: -10px;
+          margin-left: -10px;
+          border-bottom-color: rgb(249, 247, 237);
+          border-top-width: 0;
+        }
+
+        .sigma-tooltip.left {
+          margin-left: -12px;
+        }
+        .sigma-tooltip.left > .arrow {
+          top: 50%;
+          right: -10px;
+          margin-top: -10px;
+          border-left-color: rgb(249, 247, 237);
+          border-right-width: 0;
+        }
+
+        .sigma-tooltip.right {
+          margin-left: 12px;
+        }
+        .sigma-tooltip.right > .arrow {
+          top: 50%;
+          left: -10px;
+          margin-top: -10px;
+          border-right-color: rgb(249, 247, 237);
+          border-left-width: 0;
+        }
     </style>
     <link href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
 
@@ -47,60 +156,95 @@
 
 {% block content %}
     <div id="centered-loader"><span class="fa fa-circle-o-notch fa-spin fa-3x"></span></div>
-    <form>
-        <div class="row">
-            <div class="col-md-5">
-                <h2>1. Select an Organism</h2>
+    <div id="setting-nav-shower"><a class="setting-nav-shower-a" href="#"><span class="fa fa-gg fa-2x"></span></a></div>
+    <div id="settings-nav" class="container">
+        <form>
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>1. Select an Organism<a class="setting-nav-toggle pull-right" href="#"><span class="fa fa-gg"></span></a></h5>
 
-                <div class="form-group">
-                    <select class="org_selector" style="width:75%">
-                        <option value="none" selected disabled>Choose an organism...</option>
-                        {% for o in organisms %}
-                            <option value="{{ o.org }}" {% if o.tax == model_name %} selected {% endif %}>{{ o.tax }}</option>
-                        {% endfor %}
-                    </select>
-                    <p class="help-block">Pathway are loaded when you choose an organism. <span class="meta-loader fa fa-circle-o-notch fa-spin"></span></p>
+                    <div class="form-group">
+                        <select class="org_selector" style="width:75%">
+                            <option value="none" selected disabled>Choose an organism...</option>
+                            {% for o in organisms %}
+                                <option value="{{ o.org }}" {% if o.tax == model_name %} selected {% endif %}>{{ o.tax }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="help-block">Pathway are loaded when you choose an organism. <span class="meta-loader fa fa-circle-o-notch fa-spin"></span></p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-5">
-                <h2>2. Select a pathway</h2>
-                 <div class="form-group">
-                    <select class="pathway_selector" style="width:75%">
-                        {# <option value="none" selected disabled>Choose a pathway...</option> #}
-                        <option value="whole">Whole model</option>
-                        {% for pathway in pathways %}
-                            <option value="{{pathway['id']}}">{{pathway['name'].split(' - ') | first}}</option>
-                        {% endfor %}
-                    </select>
-                    <p id="help" class="help-block">Choose an organism first.</p>
-                 </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>2. Select a pathway</h5>
+                     <div class="form-group">
+                        <select class="pathway_selector" style="width:75%">
+                            {# <option value="none" selected disabled>Choose a pathway...</option> #}
+                            <option value="whole">Whole model</option>
+                            {% for pathway in pathways %}
+                                <option value="{{pathway['id']}}">{{pathway['name'].split(' - ') | first}}</option>
+                            {% endfor %}
+                        </select>
+                        <p id="help" class="help-block">Choose an organism first.</p>
+                     </div>
+                </div>
             </div>
-            <div class="col-md-2">
-                <button class="load-cytoscape-btn btn btn-info">Load pathway</button>
+            <div class="row" style="padding-bottom: 20px;">
+                <div class="col-md-12 text-center">
+                    <button class="load-cytoscape-btn btn btn-info">Load pathway</button>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
     <div class="row">
-        <div id="cytoscape-container" style="height: 600px; border: 3px solid black">
-
+        <div id="cytoscape-container" style="border: 3px solid black">
         </div>
     </div>
 {% endblock %}
 
 {% block scripts %}
-    {# <script src="{{ url_for('static', filename='js/arbor.js') }}"></script> #}
-    {# <script src="{{ url_for('static', filename='js/cola.v3.min.js') }}"></script> #}
-    {# <script src="{{ url_for('static', filename='js/cytoscape.min.js') }}"></script> #}
-    {# <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.js"></script>
-    <script src="{{ url_for('static', filename='js/cytoscape.qtip.js') }}"></script> #}
     <script src="{{ url_for('static', filename='js/sigma.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.parsers.json.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.layout.forceAtlas2.min.js')}}"></script>
+    
+    {# force directed layout #}
+    <script src="{{ url_for('static', filename='js/plugins/sigma.layout.forceAtlas2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.animate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.layouts.forceLink/worker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.layouts.forceLink/supervisor.js') }}"></script>
+
+    
+    {# dragging node #}
     <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.dragNodes.min.js')}}"></script>
+
+    {# halo #}
+    <script src="{{ url_for('static', filename='js/plugins/sigma.helpers.graph.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/settings.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/sigma.renderers.halo.js')}}"></script>
+
+    {# tooltips #}
+    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.tooltips.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
     <script src="{{ url_for('static', filename='js/chosen.jquery.min.js')}}"></script>
     <script>
         $(function() {
 
+            $('.setting-nav-shower-a').on('click', function(e){
+                e.preventDefault();
+                $('#setting-nav-shower').fadeOut();
+                $('#settings-nav').fadeIn();
+            });
+
+            var setting_nav_toggle = $('.setting-nav-toggle');
+            setting_nav_toggle.on('click', function(e) {
+                e.preventDefault();
+                $('#settings-nav').fadeOut();
+                $('#setting-nav-shower').fadeIn();    
+            });
+
+
+
+            var window_size = $(window).height() - 100;
+            $("#cytoscape-container").css('height', window_size + 'px');
+            $("#cytoscape-container").css('margin-top', '-16px');
             //$('.sidebar-menu').css('height', $(document).height() + 'px'); 
 
             var org_selector = $(".org_selector");
@@ -152,13 +296,122 @@
                                 graph: JSON.parse(data),
                                 container: 'cytoscape-container',
                                 settings: {
+                                    nodeHaloColor: '#ecf0f1',
+                                    edgeHaloColor: '#ecf0f1',
+                                    nodeHaloSize: 50,
+                                    edgeHaloSize: 10,
                                     //defaultNodeColor: '#ec5148'
+                                    maxEdgeSize: 1,
+                                    animationsTime: 2500
                                 }
                             });
+                            s.graph.edges().forEach(function(edge){
+                                // fetch data attribute to make arrow on source
+                                // or on target
+                                console.log(edge);
+                                edge.type='curvedArrow';
+                            });
                             s.refresh();
+                            var fa = sigma.layouts.configForceLink(s, {
+                              worker: true,
+                              barnesHutOptimize: true,
+                              autoStop: true,
+                              background: true,
+                              easing: 'cubicInOut'
+                            });
+
+                            sigma.layouts.startForceLink();
+
                             var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
                             // s.startForceAtlas2();
-                            console.log('sigma loaded');
+                        
+
+                            function renderHalo() {
+                              s.renderers[0].halo({
+                                nodes: s.graph.nodes()
+                              });
+                            }
+
+                            renderHalo();
+
+                            s.renderers[0].bind('render', function(e) {
+                              renderHalo();
+                            });
+
+                            s.bind('clickStage', function(e) {
+                              renderHalo();
+                            });
+
+                            s.bind('hovers', function(e) {
+                              var adjacentNodes = [],
+                                  adjacentEdges = [];
+
+                              if (!e.data.enter.nodes.length) return;
+
+                              // Get adjacent nodes:
+                              e.data.enter.nodes.forEach(function(node) {
+                                adjacentNodes = adjacentNodes.concat(s.graph.adjacentNodes(node.id));
+                              });
+
+                              // Add hovered nodes to the array and remove duplicates:
+                              adjacentNodes = arrayUnique(adjacentNodes.concat(e.data.enter.nodes));
+
+                              // Get adjacent edges:
+                              e.data.enter.nodes.forEach(function(node) {
+                                adjacentEdges = adjacentEdges.concat(s.graph.adjacentEdges(node.id));
+                              });
+
+                              // Remove duplicates:
+                              adjacentEdges = arrayUnique(adjacentEdges);
+
+                              // Render halo:
+                              s.renderers[0].halo({
+                                nodes: adjacentNodes,
+                                edges: adjacentEdges
+                              }); 
+                            }); // end bind hovers
+    
+                            var config = {
+                              node: {
+                                show: 'clickNode',
+                                //hide: 'hovers',
+                                cssClass: 'sigma-tooltip',
+                                position: 'top',
+                                //autoadjust: true,
+                                template:
+                                '<div class="arrow"></div>' +
+                                ' <div class="sigma-tooltip-header">{{label}}</div>' +
+                                '  <div class="sigma-tooltip-body">' +
+                                '    <table>' +
+                                '    </table>' +
+                                '  </div>' +
+                                '  <div class="sigma-tooltip-footer">Number of connections: {{degree}}</div>',
+                                renderer: function(node, template) {
+                                  // The function context is s.graph
+                                  console.log(node);
+                                  node.degree = this.degree(node.id);
+
+                                  // Returns an HTML string:
+                                  //return Mustache.render(template, node);
+
+                                  // Returns a DOM Element:
+                                  var el = document.createElement('div');
+                                  return el.innerHTML = Mustache.render(template, node);
+                                }
+                              }
+                            };
+
+                            // Instanciate the tooltips plugin with a Mustache renderer for node tooltips:
+                            var tooltips = sigma.plugins.tooltips(s, s.renderers[0], config);
+
+                            tooltips.bind('shown', function(event) {
+                              console.log('tooltip shown', event);
+                            });
+
+                            tooltips.bind('hidden', function(event) {
+                              console.log('tooltip hidden', event);
+                            });
+
                             $('#centered-loader').css('display', 'none');
                             // sigma.parsers.json(data, {
                             //   container: 'cytoscape-container'

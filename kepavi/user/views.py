@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-    flaskbb.user.views
+    kepavi.user.views
     ~~~~~~~~~~~~~~~~~~~~
 
     The user view handles the user profile
     and the user settings from a signed in user.
 
-    :copyright: (c) 2014 by the FlaskBB Team.
     :license: BSD, see LICENSE for more details.
 """
 import json
 import logging
 # import cobra
 # from kepavi.biomodels import BiomodelMongo
-from kepavi.cobra_utils import get_sbml_from_s3, _launch_fba, build_kegg_network_mixed, _build_genome_scale_network
+from kepavi.cobra_utils import _launch_fba, build_kegg_network_mixed,\
+                               _build_genome_scale_network
 from kepavi.kegg_utils import Kegg, Organism
 from kepavi.utils import s3_upload_from_server
 from kepavi.private_keys import S3_URL
@@ -22,6 +22,7 @@ import os
 
 from kepavi.user.forms import CreateProjectForm, CreateFBAAnalysisForm
 from kepavi.user.models import Project, Analysis, User, Biomodel
+from kepavi.auth.forms import LoginForm
 
 import requests
 from flask import Blueprint, flash, request, redirect, url_for, render_template
@@ -77,7 +78,7 @@ def get_sbml_reactions(username):
     if not model_name:
         flash("An error occured", 'error')
         return redirect(request.referrer)
-    u = User.query.filter(User.username == username).first_or_404()
+    # u = User.query.filter(User.username == username).first_or_404()
     model = Biomodel.query.filter(Biomodel.name == model_name).first_or_404()
 
     # for the moment this not allowed
@@ -190,9 +191,9 @@ def visualize_fba_analysis(username, analysis_id):
     model = analysis.model
     model_name = model.name
     pathways = Kegg.get_pathways_list(org=model.kegg_org)
-    return render_template('user/fba_analysis.html', analysis=analysis,
-                           organisms=orgs, model_name=model_name,
-                           pathways=pathways)
+    return render_template('user/fba_analysis.html',
+                           analysis=analysis, organisms=orgs,
+                           model_name=model_name, pathways=pathways)
 
 
 @user.route('/<username>/get_kegg_pathways', methods=['GET'])
@@ -242,7 +243,7 @@ def get_kgml(username):
 
     else:
         kegg_model = Kegg.get_kgml_obj(pathway_id)
- 
+
         if model is None or kegg_model is None:
             return render_template('errors/page_not_found.html'), 404
 
