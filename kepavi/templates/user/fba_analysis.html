@@ -72,6 +72,7 @@
           background-color: rgb(249, 247, 237);
           box-shadow: 0 2px 6px rgba(0,0,0,0.3);
           border-radius: 6px;
+
         }
 
         .sigma-tooltip-header {
@@ -220,13 +221,18 @@
     <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/settings.js')}}"></script>
     <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/sigma.renderers.halo.js')}}"></script>
 
+    {# design #}
+    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.colorbrewer.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.design.js')}}"></script>
+
+
     {# tooltips #}
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.tooltips.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.tooltips.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chosen.jquery.min.js')}}"></script>
     <script>
         $(function() {
-
+            // show hide settings nav
             $('.setting-nav-shower-a').on('click', function(e){
                 e.preventDefault();
                 $('#setting-nav-shower').fadeOut();
@@ -241,12 +247,13 @@
             });
 
 
-
+            // resize sigma container
             var window_size = $(window).height() - 100;
             $("#cytoscape-container").css('height', window_size + 'px');
             $("#cytoscape-container").css('margin-top', '-16px');
             //$('.sidebar-menu').css('height', $(document).height() + 'px'); 
 
+            //manage selectors
             var org_selector = $(".org_selector");
             org_selector.chosen({
                 no_results_text: "No match found..."
@@ -311,6 +318,9 @@
                                 console.log(edge);
                                 edge.type='curvedArrow';
                             });
+                            s.graph.nodes().forEach(function(node){
+                                node.degree = s.graph.degree(node.id); 
+                            });
                             s.refresh();
                             var fa = sigma.layouts.configForceLink(s, {
                               worker: true,
@@ -322,9 +332,7 @@
 
                             sigma.layouts.startForceLink();
 
-                            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
-                            // s.startForceAtlas2();
-                        
+                            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
 
                             function renderHalo() {
                               s.renderers[0].halo({
@@ -370,33 +378,33 @@
                                 edges: adjacentEdges
                               }); 
                             }); // end bind hovers
-    
+                            
+                            // tooltips configuration
                             var config = {
                               node: {
                                 show: 'clickNode',
                                 //hide: 'hovers',
                                 cssClass: 'sigma-tooltip',
                                 position: 'top',
-                                //autoadjust: true,
+                                // autoadjust: false,
                                 template:
                                 '<div class="arrow"></div>' +
-                                ' <div class="sigma-tooltip-header">{{label}}</div>' +
+                                ' <div class="sigma-tooltip-header">\{\{full_name\}\}</div>' +
                                 '  <div class="sigma-tooltip-body">' +
-                                '    <table>' +
-                                '    </table>' +
                                 '  </div>' +
-                                '  <div class="sigma-tooltip-footer">Number of connections: {{degree}}</div>',
+                                '  <div class="sigma-tooltip-footer">Number of connections: \{\{degree\}\}</div>',
                                 renderer: function(node, template) {
                                   // The function context is s.graph
-                                  console.log(node);
                                   node.degree = this.degree(node.id);
 
                                   // Returns an HTML string:
-                                  //return Mustache.render(template, node);
+                                    console.log(template);
+                                    console.log(node);
+                                  return Mustache.render(template, node);
 
                                   // Returns a DOM Element:
-                                  var el = document.createElement('div');
-                                  return el.innerHTML = Mustache.render(template, node);
+                                  //var el = document.createElement('div');
+                                  //return el.innerHTML = Mustache.render(template, node);
                                 }
                               }
                             };
@@ -404,18 +412,34 @@
                             // Instanciate the tooltips plugin with a Mustache renderer for node tooltips:
                             var tooltips = sigma.plugins.tooltips(s, s.renderers[0], config);
 
-                            tooltips.bind('shown', function(event) {
-                              console.log('tooltip shown', event);
-                            });
+                            // setting styles
+                            var myStyles = {
+                              nodes: {
+                                label: {
+                                  by: 'id',
+                                  format: function(value) { return '#' + value; }
+                                },
+                                color: {
+                                  by: 'degree',
+                                  scheme: 'colorbrewer.sequentialGreen'
+                                }
+                            }
+                              
+                            };
+                            var myPalette = {
+                              colorbrewer: {
+                                sequentialGreen: sigma.plugins.colorbrewer.Spectral
+                              }
+                          };
 
-                            tooltips.bind('hidden', function(event) {
-                              console.log('tooltip hidden', event);
-                            });
+                              // Instanciate the design:
+                              var design = sigma.plugins.design(s, {
+                                styles: myStyles,
+                                palette: myPalette
+                              });
+                              design.apply();
 
                             $('#centered-loader').css('display', 'none');
-                            // sigma.parsers.json(data, {
-                            //   container: 'cytoscape-container'
-                            // });
                         }
                 );
             });

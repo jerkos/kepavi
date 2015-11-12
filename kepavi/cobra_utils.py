@@ -90,9 +90,9 @@ def _add_node(data,
               position,
               bg_color,
               shape='ellipse',
-              show_compound_img=False, 
+              show_compound_img=False,
               backend='sigma'):
-    
+
     """
     css properties are not applied when they are in snakeCase.
     :param entry:
@@ -106,7 +106,8 @@ def _add_node(data,
 
     node_data = {'id': node_id,
                  #'name': name,
-                 'label': name,
+                 'label': name[:10] + '...',
+                 'full_name': name,
                  'size': 5,
                  'x': position.x if position is not None else random.random(),
                  'y': position.y if position is not None else random.random()
@@ -152,7 +153,7 @@ def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True
                  'target': id2,
                  'size': 1,
                  'type': 'curvedArrow',
-                 'data': 
+                 'data':
                     {
                         'flux': flux,
                         'reversible': reaction.reversibility
@@ -202,7 +203,7 @@ def _build_genome_scale_network(model, results):
         metabolites_ids.add(m.id)
     for r in model.reactions:
         if r.reactants and r.products:
-            if r.reactants[0].id in metabolites_ids and r.products[0].id in metabolites_ids: 
+            if r.reactants[0].id in metabolites_ids and r.products[0].id in metabolites_ids:
                 _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
     return data
 
