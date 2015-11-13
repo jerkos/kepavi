@@ -152,7 +152,7 @@ def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True
                  'source': id1,
                  'target': id2,
                  'size': 1,
-                 'type': 'curvedArrow',
+                 'type': 'tapered',
                  'data':
                     {
                         'flux': flux,

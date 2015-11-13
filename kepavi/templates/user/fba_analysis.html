@@ -181,7 +181,7 @@
                      <div class="form-group">
                         <select class="pathway_selector" style="width:75%">
                             {# <option value="none" selected disabled>Choose a pathway...</option> #}
-                            <option value="whole">Whole model</option>
+                            <option value="whole" selected>Whole model</option>
                             {% for pathway in pathways %}
                                 <option value="{{pathway['id']}}">{{pathway['name'].split(' - ') | first}}</option>
                             {% endfor %}
@@ -195,6 +195,9 @@
                     <button class="load-cytoscape-btn btn btn-info">Load pathway</button>
                 </div>
             </div>
+            <div class="row text-center">
+                <button class="btn btn-sucess filter-node">Filter node</button>
+            </div>
         </form>
     </div>
     <div class="row">
@@ -204,31 +207,28 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/sigma.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/sigma.min.js')}}"></script>
     
     {# force directed layout #}
-    <script src="{{ url_for('static', filename='js/plugins/sigma.layout.forceAtlas2.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.animate.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.layouts.forceLink/worker.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.layouts.forceLink/supervisor.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceAtlas2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.animate.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceLink.min.js') }}"></script>
     
     {# dragging node #}
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.dragNodes.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.dragNodes.min.js')}}"></script>
 
     {# halo #}
-    <script src="{{ url_for('static', filename='js/plugins/sigma.helpers.graph.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/settings.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.renderers.halo/sigma.renderers.halo.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.helpers.graph.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.renderers.halo.min.js')}}"></script>
 
     {# design #}
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.colorbrewer.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.design.js')}}"></script>
-
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.colorbrewer.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.design.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.renderers.customEdgeShapes.min.js')}}"></script>
 
     {# tooltips #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
-    <script src="{{ url_for('static', filename='js/plugins/sigma.plugins.tooltips.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.tooltips.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/chosen.jquery.min.js')}}"></script>
     <script>
         $(function() {
@@ -298,39 +298,45 @@
                 $('#centered-loader').css('display', 'inline');
                 $.get("{{ url_for('user.get_kgml', username=current_user.username) }}?pathway_name=" + pathway_name + "&pathway_id=" + pathway_id + "&analysis_id=" + "{{ analysis.id }}",
                         function(data){
+
                             sigma.renderers.def = sigma.renderers.canvas
                             s = new sigma({
                                 graph: JSON.parse(data),
                                 container: 'cytoscape-container',
+                                //type: 'canvas',
                                 settings: {
                                     nodeHaloColor: '#ecf0f1',
-                                    edgeHaloColor: '#ecf0f1',
-                                    nodeHaloSize: 50,
-                                    edgeHaloSize: 10,
+                                    labelAlignment: 'center',
+                                    //edgeHaloColor: '#ecf0f1',
+                                    enableEdgeHovering: true,
+                                    edgeHoverSizeRatio: 2,
+                                    nodeHaloSize: 40,
+                                    //edgeHaloSize: 10,
                                     //defaultNodeColor: '#ec5148'
                                     maxEdgeSize: 1,
                                     animationsTime: 2500
                                 }
                             });
-                            s.graph.edges().forEach(function(edge){
-                                // fetch data attribute to make arrow on source
-                                // or on target
-                                console.log(edge);
-                                edge.type='curvedArrow';
-                            });
+                            // s.graph.edges().forEach(function(edge){
+                            //     // fetch data attribute to make arrow on source
+                            //     // or on target
+                                
+                            //     edge.type='tapered';
+                            //     console.log(edge);
+                            // });
                             s.graph.nodes().forEach(function(node){
                                 node.degree = s.graph.degree(node.id); 
                             });
-                            s.refresh();
                             var fa = sigma.layouts.configForceLink(s, {
                               worker: true,
-                              barnesHutOptimize: true,
+                              barnesHutOptimize: false,
                               autoStop: true,
                               background: true,
                               easing: 'cubicInOut'
                             });
 
                             sigma.layouts.startForceLink();
+                            //s.refresh();
 
                             var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
 
@@ -340,21 +346,34 @@
                               });
                             }
 
-                            renderHalo();
+                            //renderHalo();
 
                             s.renderers[0].bind('render', function(e) {
-                              renderHalo();
+                              //renderHalo();
                             });
 
                             s.bind('clickStage', function(e) {
-                              renderHalo();
+                              //renderHalo();
                             });
 
                             s.bind('hovers', function(e) {
                               var adjacentNodes = [],
                                   adjacentEdges = [];
 
-                              if (!e.data.enter.nodes.length) return;
+
+                                if (e.data.leave.nodes.length) {
+                                    console.log('leaving...');
+                                    s.renderers[0].halo({
+                                        nodes: [], //adjacentNodes,
+                                        edges: [] //adjacentEdges
+                                      });
+                                    return;
+                                }
+
+                              if (!e.data.enter.nodes.length) 
+                                return;
+
+
 
                               // Get adjacent nodes:
                               e.data.enter.nodes.forEach(function(node) {
@@ -362,7 +381,7 @@
                               });
 
                               // Add hovered nodes to the array and remove duplicates:
-                              adjacentNodes = arrayUnique(adjacentNodes.concat(e.data.enter.nodes));
+                              adjacentNodes = adjacentNodes.concat(e.data.enter.nodes);
 
                               // Get adjacent edges:
                               e.data.enter.nodes.forEach(function(node) {
@@ -370,7 +389,7 @@
                               });
 
                               // Remove duplicates:
-                              adjacentEdges = arrayUnique(adjacentEdges);
+                              adjacentEdges = adjacentEdges;
 
                               // Render halo:
                               s.renderers[0].halo({
@@ -379,6 +398,22 @@
                               }); 
                             }); // end bind hovers
                             
+                            
+                            function hideNodeBasedOnDegree() {
+                                s.graph.nodes().forEach(function(node){
+                                    if (node.degree == 0) {
+                                        node.hidden = true;
+                                    }
+                                });
+                                s.refresh();
+                            }
+
+                            $('.filter-node').on('click', function(e){
+                                e.preventDefault();
+                                hideNodeBasedOnDegree();
+
+                            });
+
                             // tooltips configuration
                             var config = {
                               node: {
@@ -415,13 +450,16 @@
                             // setting styles
                             var myStyles = {
                               nodes: {
-                                label: {
-                                  by: 'id',
-                                  format: function(value) { return '#' + value; }
-                                },
+                                // label: {
+                                //   by: 'id',
+                                //   format: function(value) { return '#' + value; }
+                                // },
                                 color: {
                                   by: 'degree',
                                   scheme: 'colorbrewer.sequentialGreen'
+                                },
+                                size: {
+                                    by: 'degree'
                                 }
                             }
                               
