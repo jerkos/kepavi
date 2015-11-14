@@ -12,6 +12,24 @@ import random
 # larger graph
 GRAPH_LIBRARY_BACKEND = {'cytoscape', 'sigma'}
 
+# this metabolites are involved in too much reactions
+# and make the visualization too complicated
+UNDESIRABLES = {'H',
+                'H+',
+                'H(+)',
+                'H2O',
+                'ADP',
+                'ATP',
+                'Diphosphate',
+                'Phosphate',
+                'UDP',
+                'Coenzyme-A',
+                'Nicotinamide-adenine-dinucleotide',
+                'Nicotinamide-adenine-dinucleotide-phosphate',
+                'Nicotinamide-adenine-dinucleotide--reduced',
+                'Ammonium',
+                'CO2'}
+
 
 def get_sbml_from_s3(url):
     """
@@ -87,6 +105,7 @@ def _add_node(data,
               node_id,
               klass,
               name,
+              flux,
               position,
               bg_color,
               shape='ellipse',
@@ -110,7 +129,10 @@ def _add_node(data,
                  'full_name': name,
                  'size': 5,
                  'x': position.x if position is not None else random.random(),
-                 'y': position.y if position is not None else random.random()
+                 'y': position.y if position is not None else random.random(),
+                 'data': {
+                    'flux': flux
+                 }
                  #'content': name,
                  #'textValign': 'top',
                  #'width': 10,
@@ -153,11 +175,10 @@ def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True
                  'target': id2,
                  'size': 1,
                  'type': 'tapered',
-                 'data':
-                    {
-                        'flux': flux,
-                        'reversible': reaction.reversibility
-                    }
+                 'data': {
+                    'flux': flux,
+                    'reversible': reaction.reversibility
+                 }
                  #'color': '#ccc'
                  #'targetArrowShape':  'triangle' if arrow_target else 'none',
                  #'sourceArrowShape':  'triangle' if arrow_src else 'none',
@@ -175,36 +196,65 @@ def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True
 
 
 def _build_genome_scale_network(model, results):
+    """
+    render all metabolites (nodes) and reactions (edges)
+    of the supplied SBML model
+
+    Could be simplified to iterate on reactions only once
+    avoiding creating `flux_by_metabolites_id` variable
+    Just wanted to see if this is working or not
+    """
+
     data = {'nodes': [], 'edges': []}
 
     x_dict = results['x_dict']
 
+    # first pass to get flux for each metabolites
+    flux_by_metabolites_id = {}
+    for r in model.reactions:
+        reactants = set(r.reactants) - UNDESIRABLES
+        products = set(r.products) - UNDESIRABLES
+
+        flux = x_dict[r.id]
+        for e in reactants + products:
+            flux_by_metabolites_id[e.id] = flux
+
     metabolites_ids = set()
     for m in model.metabolites:
-        if m.name in {'H',
-                      'H+',
-                      'H(+)',
-                      'H2O',
-                      'ADP',
-                      'ATP',
-                      'Diphosphate',
-                      'Phosphate',
-                      'UDP',
-                      'Coenzyme-A',
-                      'Nicotinamide-adenine-dinucleotide',
-                      'Nicotinamide-adenine-dinucleotide-phosphate',
-                      'Nicotinamide-adenine-dinucleotide--reduced',
-                      'Ammonium',
-                      'CO2'} or m.compartment == 'e':
+        if m.name in UNDESIRABLES or m.compartment == 'e':
             continue
-        # data, node_id, name, position, bg_color, shape='ellipse', show_compound_img=False
-        # data, node_id, klass, name, position, bg_color, shape='ellipse', show_compound_img=False
-        _add_node(data, m.id, 'metabolite', m.name, None, '#FFFFFF')
-        metabolites_ids.add(m.id)
+
+        # add the metabolite if not yet added
+        if m.id not in metabolites_ids:
+            _add_node(data,
+                      m.id,
+                      'metabolite',
+                      m.name,
+                      flux_by_metabolites_id[m.id],
+                      None,
+                      '#FFFFFF')
+            metabolites_ids.add(m.id)
+
     for r in model.reactions:
-        if r.reactants and r.products:
-            if r.reactants[0].id in metabolites_ids and r.products[0].id in metabolites_ids:
-                _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
+        reactants = set(r.reactants) - UNDESIRABLES
+        products = set(r.products) - UNDESIRABLES
+
+        flux = x_dict[r.id]
+        target_to_source = flux <= 0
+
+        for reactant in reactants:
+            if reactant.id not in metabolites_ids:
+                continue
+            for product in products:
+                if product not in metabolites_ids:
+                    continue
+                _add_edge(data,
+                          r,
+                          reactant.id if not target_to_source else product.id,
+                          products.id if not target_to_source else reactant.id,
+                          flux)
+            #if reactants[0].id in metabolites_ids and products[0].id in metabolites_ids:
+            #    _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
     return data
 
 
