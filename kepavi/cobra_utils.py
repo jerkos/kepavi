@@ -167,9 +167,9 @@ def _add_node(data,
         )
 
 
-def _add_edge(data, reaction, id1, id2, flux, arrow_src=False, arrow_target=True, backend='sigma'):
-    concat = '-'.join([str(id1), str(id2)])
-    edge_data = {'id': reaction.id if reaction is not None else concat,
+def _add_edge(data, reaction, edge_id, id1, id2, flux, arrow_src=False, arrow_target=True, backend='sigma'):
+    #concat = '-'.join([str(id1), str(id2), str(index[0]), str(index[1])])  #'-'.join([str(id1), str(id2)])
+    edge_data = {'id': edge_id, #reaction.id if reaction is not None else concat,
                  #'content': reaction.name if reaction is not None else 'NA',
                  'source': id1,
                  'target': id2,
@@ -210,49 +210,70 @@ def _build_genome_scale_network(model, results):
     x_dict = results['x_dict']
 
     # first pass to get flux for each metabolites
-    flux_by_metabolites_id = {}
+    # flux_by_metabolites_id = {}
+    # for r in model.reactions:
+    #     f_reactants, f_products = r.reactants, r.products
+    #     reactants = set(f_reactants) - set([m for m in f_reactants if m.name in UNDESIRABLES])
+    #     products = set(f_products) - set([m for m in f_products if m.name in UNDESIRABLES])
+
+    #     flux = x_dict[r.id]
+    #     for e in reactants.union(products):
+    #         flux_by_metabolites_id[e.id] = flux
+
+    metabolites_ids, edge_ids = set(), set()
+    # for m in model.metabolites:
+    #     if m.name in UNDESIRABLES or m.compartment == 'e':
+    #         continue
+
+    #     # add the metabolite if not yet added
+    #     if m.id not in metabolites_ids:
+    #         _add_node(data,
+    #                   m.id,
+    #                   'metabolite',
+    #                   m.name,
+    #                   flux_by_metabolites_id[m.id],
+    #                   None,
+    #                   '#FFFFFF')
+    #         metabolites_ids.add(m.id)
+
     for r in model.reactions:
-        reactants = set(r.reactants) - UNDESIRABLES
-        products = set(r.products) - UNDESIRABLES
+        f_reactants, f_products = r.reactants, r.products
 
-        flux = x_dict[r.id]
-        for e in reactants + products:
-            flux_by_metabolites_id[e.id] = flux
-
-    metabolites_ids = set()
-    for m in model.metabolites:
-        if m.name in UNDESIRABLES or m.compartment == 'e':
-            continue
-
-        # add the metabolite if not yet added
-        if m.id not in metabolites_ids:
-            _add_node(data,
-                      m.id,
-                      'metabolite',
-                      m.name,
-                      flux_by_metabolites_id[m.id],
-                      None,
-                      '#FFFFFF')
-            metabolites_ids.add(m.id)
-
-    for r in model.reactions:
-        reactants = set(r.reactants) - UNDESIRABLES
-        products = set(r.products) - UNDESIRABLES
+        reactants = set(f_reactants) - set([m for m in f_reactants if m.name in UNDESIRABLES]) # set(r.reactants) - UNDESIRABLES
+        products = set(f_products) - set([m for m in f_products if m.name in UNDESIRABLES])
 
         flux = x_dict[r.id]
         target_to_source = flux <= 0
 
-        for reactant in reactants:
+        for _, reactant in enumerate(reactants):
             if reactant.id not in metabolites_ids:
-                continue
-            for product in products:
-                if product not in metabolites_ids:
-                    continue
-                _add_edge(data,
-                          r,
-                          reactant.id if not target_to_source else product.id,
-                          products.id if not target_to_source else reactant.id,
-                          flux)
+                _add_node(data,
+                          reactant.id,
+                          'metabolite',
+                          reactant.name,
+                          flux,
+                          None,
+                          '#FFFFFF')
+                metabolites_ids.add(reactant.id)
+            for __, product in enumerate(products):
+                if product.id not in metabolites_ids:
+                    _add_node(data,
+                              product.id,
+                              'metabolite',
+                              product.name,
+                              flux,
+                              None,
+                              '#FFFFFF')
+                    metabolites_ids.add(product.id)
+                edge_id = '-'.join([str(reactant.id), str(product.id), str(_), str(__)])
+                if edge_id not in edge_ids:
+                    _add_edge(data,
+                              r,
+                              edge_id,
+                              reactant.id if not target_to_source else product.id,
+                              product.id if not target_to_source else reactant.id,
+                              flux)
+                    edge_ids.add(edge_id)
             #if reactants[0].id in metabolites_ids and products[0].id in metabolites_ids:
             #    _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
     return data

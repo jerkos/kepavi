@@ -313,7 +313,7 @@
                                     nodeHaloSize: 40,
                                     //edgeHaloSize: 10,
                                     //defaultNodeColor: '#ec5148'
-                                    maxEdgeSize: 1,
+                                    //maxEdgeSize: 1,
                                     animationsTime: 2500
                                 }
                             });
@@ -325,7 +325,8 @@
                             //     console.log(edge);
                             // });
                             s.graph.nodes().forEach(function(node){
-                                node.degree = s.graph.degree(node.id); 
+                                console.log(s.graph.degree(node.id));
+                                node.degree = parseInt(s.graph.degree(node.id));
                             });
                             var fa = sigma.layouts.configForceLink(s, {
                               worker: true,
@@ -430,7 +431,7 @@
                                 '  <div class="sigma-tooltip-footer">Number of connections: \{\{degree\}\}</div>',
                                 renderer: function(node, template) {
                                   // The function context is s.graph
-                                  node.degree = this.degree(node.id);
+                                  // node.degree = this.degree(node.id);
 
                                   // Returns an HTML string:
                                     console.log(template);
