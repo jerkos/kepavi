@@ -13,7 +13,7 @@ Because Kegg pathway viewer are complete but not very beautiful.
 
 ## Alternatives
 
-*[escher](https://escher.github.io/)
+* [escher](https://escher.github.io/)
 
 ## Future
 
