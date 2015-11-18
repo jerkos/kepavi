@@ -13,6 +13,10 @@
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chosen.min.css') }}">
     <style>
+
+        html, body {
+            overflow: hidden;
+        }
         .meta-loader {
             display: none;
         }
@@ -29,7 +33,7 @@
             /*height:100%;*/
             width:100%;
             overflow: hidden;
-            background-color: #2c3e50;
+            background-color: black; /*#2c3e50;*/
         }
 
         hr {
@@ -43,6 +47,7 @@
             background-color: white;
             border-radius: 5px;
             z-index: 25;
+            font-size: 0.8em;
         }
 
         #setting-nav-shower {
@@ -62,6 +67,7 @@
             right: 50%;
             z-index: 1;
             display: none;
+            color:white;
         }
 
         .help-block { font-size: 0.8em;}
@@ -150,6 +156,10 @@
           border-right-color: rgb(249, 247, 237);
           border-left-width: 0;
         }
+
+        .node-color-select .edge-color-select{
+            font-size: 0.8em;          
+         }
     </style>
     <link href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
 
@@ -195,7 +205,124 @@
                     <button class="load-cytoscape-btn btn btn-info">Load pathway</button>
                 </div>
             </div>
-            <div class="row text-center">
+            <h5>3. Customize</h5>
+            <div class="row" style="padding-bottom: 10px;">
+                <div class="col-md-4" style="font-size: 0.8em;">
+                    <span>Node color</span>
+                </div>
+                <div class="col-md-4">
+
+                    <select class="node-color-select">
+                        <option value="YlGn">YlGn</option>
+                        <option value="YlGnBu">YlGnBu</option>
+                        <option value="GnBu">GnBu</option>
+                        <option value="BuGn">BuGn</option>
+                        <option value="PuBuGn">PuBuGn</option>
+                        <option value="PuBu">PuBu</option>
+                        <option value="BuPu">BuPu</option>
+                        <option value="RdPu">RdPu</option>
+                        <option value="PuRd">PuRd</option>
+                        <option value="OrRd">OrRd</option>
+                        <option value="YlOrRd">YlOrRd</option>
+                        <option value="YlOrBr">YlOrBr</option>
+                        <option value="Purples">Purples</option>
+                        <option value="Blues">Blues</option>
+                        <option value="Greens">Greens</option>
+                        <option value="Oranges">Oranges</option>
+                        <option value="Reds">Reds</option>
+                        <option value="Greys">Greys</option>
+                        <option value="PuOr">PuOr</option>
+                        <option value="BrBG">BrBG</option>
+                        <option value="PRGn">PRGn</option>
+                        <option value="PiYG">PiYG</option>
+                        <option value="RdBu">RdBu</option>
+                        <option value="RdGy">RdGy</option>
+                        <option value="RdYlBu">RdYlBu</option>
+                        <option value="Spectral">Spectral</option>
+                        <option value="RdYlGn">RdYlGn</option>
+                        <option value="Accent">Accent</option>
+                        <option value="Dark2">Dark2</option>
+                        <option value="Paired">Paired</option>
+                        <option value="Pastel1">Pastel1</option>
+                        <option value="Pastel2">Pastel2</option>
+                        <option value="Pastel3">Pastel3</option>
+                        <option value="Set1">Set1</option>
+                        <option value="Set2">Set2</option>
+                        <option value="Set3">Set3</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-left">
+                    <a href="#" class="apply-node-color">apply</a>
+                </div>
+            </div>
+            <div class="row" style="padding-bottom: 10px;">
+                <div class="col-md-4" style="font-size: 0.8em;">
+                    <span>Edge color</span>
+                </div>
+                <div class="col-md-4">
+
+                    <select class="edge-color-select">
+                        <option value="YlGn">YlGn</option>
+                        <option value="YlGnBu">YlGnBu</option>
+                        <option value="GnBu">GnBu</option>
+                        <option value="BuGn">BuGn</option>
+                        <option value="PuBuGn">PuBuGn</option>
+                        <option value="PuBu">PuBu</option>
+                        <option value="BuPu">BuPu</option>
+                        <option value="RdPu">RdPu</option>
+                        <option value="PuRd">PuRd</option>
+                        <option value="OrRd">OrRd</option>
+                        <option value="YlOrRd">YlOrRd</option>
+                        <option value="YlOrBr">YlOrBr</option>
+                        <option value="Purples">Purples</option>
+                        <option value="Blues">Blues</option>
+                        <option value="Greens">Greens</option>
+                        <option value="Oranges">Oranges</option>
+                        <option value="Reds">Reds</option>
+                        <option value="Greys">Greys</option>
+                        <option value="PuOr">PuOr</option>
+                        <option value="BrBG">BrBG</option>
+                        <option value="PRGn">PRGn</option>
+                        <option value="PiYG">PiYG</option>
+                        <option value="RdBu">RdBu</option>
+                        <option value="RdGy">RdGy</option>
+                        <option value="RdYlBu">RdYlBu</option>
+                        <option value="Spectral">Spectral</option>
+                        <option value="RdYlGn">RdYlGn</option>
+                        <option value="Accent">Accent</option>
+                        <option value="Dark2">Dark2</option>
+                        <option value="Paired">Paired</option>
+                        <option value="Pastel1">Pastel1</option>
+                        <option value="Pastel2">Pastel2</option>
+                        <option value="Pastel3">Pastel3</option>
+                        <option value="Set1">Set1</option>
+                        <option value="Set2">Set2</option>
+                        <option value="Set3">Set3</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-left">
+                    <a href="#" class="apply-edge-color">apply</a>
+                </div>
+            </div>
+
+            <div class="row" style="padding-bottom: 20px;">
+                <div class="col-md-4" style="font-size: 0.8em;">
+                    <span>Edge type</span>
+                </div>
+                <div class="col-md-4">
+                    <select class="edge-type-select" style="font-size:0.8em;">
+                        <option value="line">line</option>
+                        <option value="arrow">arrow</option>
+                        <option value="curvedArrow">curvedArrow</option>
+                        <option value="tapered">tapered</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                <a href="#" class="apply-edge-type">apply</a>
+                </div>
+            </div>
+
+            <div class="row text-center" style="padding-bottom: 20px;">
                 <button class="btn btn-sucess filter-node">Filter node</button>
             </div>
         </form>
@@ -213,7 +340,8 @@
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceAtlas2.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.animate.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceLink.min.js') }}"></script>
-    
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.dagre.min.js') }}"></script>
+
     {# dragging node #}
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.dragNodes.min.js')}}"></script>
 
@@ -226,6 +354,7 @@
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.design.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.renderers.customEdgeShapes.min.js')}}"></script>
 
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.legend.min.js')}}"></script>
     {# tooltips #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.tooltips.min.js') }}"></script>
@@ -295,6 +424,7 @@
                 evt.preventDefault();
                 var pathway_id = pathway_selector.val();
                 var pathway_name = $('.pathway_selector option:selected').text();
+                console.log(pathway_name);
                 $('#centered-loader').css('display', 'inline');
                 $.get("{{ url_for('user.get_kgml', username=current_user.username) }}?pathway_name=" + pathway_name + "&pathway_id=" + pathway_id + "&analysis_id=" + "{{ analysis.id }}",
                         function(data){
@@ -306,56 +436,69 @@
                                 //type: 'canvas',
                                 settings: {
                                     nodeHaloColor: '#ecf0f1',
-                                    labelAlignment: 'center',
+                                    labelAlignment: 'top',
                                     //edgeHaloColor: '#ecf0f1',
+                                    defaultLabelColor: "#fff",
+                                    enableNodeHovering: true,
                                     enableEdgeHovering: true,
-                                    edgeHoverSizeRatio: 2,
-                                    nodeHaloSize: 40,
+                                    edgeHoverSizeRatio: 1,
+                                    nodeHaloSize: 10,
                                     //edgeHaloSize: 10,
                                     //defaultNodeColor: '#ec5148'
                                     //maxEdgeSize: 1,
+                                    labelSize: 'proportionnal',
+                                    labelColor: 'node',
                                     animationsTime: 2500
                                 }
                             });
-                            // s.graph.edges().forEach(function(edge){
-                            //     // fetch data attribute to make arrow on source
-                            //     // or on target
-                                
-                            //     edge.type='tapered';
-                            //     console.log(edge);
-                            // });
+                            // setting node degree
                             s.graph.nodes().forEach(function(node){
-                                console.log(s.graph.degree(node.id));
-                                node.degree = parseInt(s.graph.degree(node.id));
-                            });
-                            var fa = sigma.layouts.configForceLink(s, {
-                              worker: true,
-                              barnesHutOptimize: false,
-                              autoStop: true,
-                              background: true,
-                              easing: 'cubicInOut'
+                                var degree = parseInt(s.graph.degree(node.id));
+                                console.log(degree);
+                                if (degree !== undefined)
+                                    node.degree = degree;
+                                else
+                                    node.degree = 0;
                             });
 
-                            sigma.layouts.startForceLink();
-                            //s.refresh();
 
+                            if (pathway_name == 'Whole model') {
+                                // configure force links layout
+                                var fa = sigma.layouts.configForceLink(s, {
+                                  worker: true,
+                                  barnesHutOptimize: false,
+                                  autoStop: true,
+                                  background: true,
+                                  gravity: 3,
+                                  alignNodeSiblings: true,
+                                  outboundAttractionDistribution: false,
+                                  nodeSiblingsScale: 50,
+                                  //nodeSiblingsAngleMin: 0.2,
+                                  linLogMode: false,
+                                  easing: 'cubicInOut'
+                                });
+
+                                sigma.layouts.startForceLink();
+                            }
+                            // drag plugin
                             var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
 
+                            // halo rendering
                             function renderHalo() {
                               s.renderers[0].halo({
                                 nodes: s.graph.nodes()
                               });
                             }
 
-                            //renderHalo();
+                            // //renderHalo();
 
-                            s.renderers[0].bind('render', function(e) {
-                              //renderHalo();
-                            });
+                            // s.renderers[0].bind('render', function(e) {
+                            //   //renderHalo();
+                            // });
 
-                            s.bind('clickStage', function(e) {
-                              //renderHalo();
-                            });
+                            // s.bind('clickStage', function(e) {
+                            //   //renderHalo();
+                            // });
 
                             s.bind('hovers', function(e) {
                               var adjacentNodes = [],
@@ -451,23 +594,75 @@
                             // setting styles
                             var myStyles = {
                               nodes: {
-                                // label: {
-                                //   by: 'id',
-                                //   format: function(value) { return '#' + value; }
-                                // },
                                 color: {
-                                  by: 'degree',
-                                  scheme: 'colorbrewer.sequentialGreen'
+                                  by: 'flux',
+                                  scheme: 'colorbrewer.Blues',
+                                  bins: 9
                                 },
                                 size: {
-                                    by: 'degree'
+                                    by: 'absflux',
+                                    min: 0.5,
+                                    max: 9,
+                                    bins: 9
                                 }
-                            }
+                              },
+                              edges: {
+                                color: {
+                                  by: 'flux',
+                                  scheme: 'colorbrewer.Greens',
+                                  bins: 9
+                                },
+                                size: {
+                                    by: 'absflux',
+                                    min: 0.01,
+                                    max: 2.5
+                                }
+                              }
                               
                             };
                             var myPalette = {
                               colorbrewer: {
-                                sequentialGreen: sigma.plugins.colorbrewer.Spectral
+                                YlGn: sigma.plugins.colorbrewer.YlGn,
+                                YlGnBu: sigma.plugins.colorbrewer.YlGnBu,
+                                GnBu: sigma.plugins.colorbrewer.GnBu,
+                                BuGn: sigma.plugins.colorbrewer.BuGn,
+                                PuBuGn: sigma.plugins.colorbrewer.PuBuGn,
+                                PuBu: sigma.plugins.colorbrewer.PuBu,
+                                BuPu: sigma.plugins.colorbrewer.BuPu,
+                                RdPu: sigma.plugins.colorbrewer.RdPu,
+                                PuRd: sigma.plugins.colorbrewer.PuRd,
+                                OrRd: sigma.plugins.colorbrewer.OrRd,
+                                YlOrRd: sigma.plugins.colorbrewer.YlOrRd,
+                                YlOrBr: sigma.plugins.colorbrewer.YlOrBr,
+                                Purples: sigma.plugins.colorbrewer.Purples,
+                                Blues: sigma.plugins.colorbrewer.Blues,
+                                Greens: sigma.plugins.colorbrewer.Greens,
+                                Oranges: sigma.plugins.colorbrewer.Oranges,
+                                Reds: sigma.plugins.colorbrewer.Reds,
+                                Greys: sigma.plugins.colorbrewer.Greys,
+                                PuOr: sigma.plugins.colorbrewer.PuOr,
+                                BrBG: sigma.plugins.colorbrewer.BrBG,
+                                PRGn: sigma.plugins.colorbrewer.PRGn,
+                                PiYG: sigma.plugins.colorbrewer.PiYG,
+                                RdBu: sigma.plugins.colorbrewer.RdBu,
+                                RdGy: sigma.plugins.colorbrewer.RdGy,
+                                RdYlBu: sigma.plugins.colorbrewer.RdYlBu,
+                                Spectral: sigma.plugins.colorbrewer.Spectral,
+                                RdYlGn: sigma.plugins.colorbrewer.RdYlGn,
+                                Accent: sigma.plugins.colorbrewer.Accent,
+                                Dark2: sigma.plugins.colorbrewer.Dark2,
+                                Paired: sigma.plugins.colorbrewer.Paired,
+                                Pastel1: sigma.plugins.colorbrewer.Pastel1,
+                                Pastel2: sigma.plugins.colorbrewer.Pastel2,
+                                Pastel3: sigma.plugins.colorbrewer.Pastel3,
+                                Set1: sigma.plugins.colorbrewer.Set1,
+                                Set2: sigma.plugins.colorbrewer.Set2,
+                                Set3: sigma.plugins.colorbrewer.Set3
+                              },
+                              edgeScheme: {
+                                'pos': '#00ff00',
+                                'neg': '#ff0000',
+                                'zero': '#d3d3d3'
                               }
                           };
 
@@ -477,6 +672,40 @@
                                 palette: myPalette
                               });
                               design.apply();
+
+                            // initialize legend
+                            var legend = sigma.plugins.legend(s);
+                           
+                           // node color select
+                           $('.apply-node-color').on('click', function(e){
+                                e.preventDefault();
+                                var selected = $('.node-color-select option:selected').text();
+                                design.nodesBy('color', {
+                                    by: 'absflux',
+                                    scheme: 'colorbrewer.' + selected,
+                                  });
+                                design.apply();
+                            });
+
+                           // node color select
+                           $('.apply-node-color').on('click', function(e){
+                                e.preventDefault();
+                                var selected = $('.edge-color-select option:selected').text();
+                                design.edgesBy('color', {
+                                    by: 'flux',
+                                    scheme: 'colorbrewer.' + selected,
+                                  });
+                                design.apply();
+                            });
+
+                           $('.apply-edge-type').on('click', function(e){
+                                e.preventDefault();
+                                var selected = $('.edge-type-select option:selected').text();
+                                s.graph.edges().forEach(function(edge){
+                                    edge.type = selected;
+                                });
+                                s.refresh();
+                           });
 
                             $('#centered-loader').css('display', 'none');
                         }

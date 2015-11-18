@@ -17,11 +17,31 @@ GRAPH_LIBRARY_BACKEND = {'cytoscape', 'sigma'}
 UNDESIRABLES = {'H',
                 'H+',
                 'H(+)',
+                'NH4(+)',
+                'NADH(2-)',
+                'NAD(+)',
+                'NADP(+)',
+                'NADPH',
+                'diphosphate(3-)',
+                'CO(2)',
+                'holo-[acyl-carrier\nprotein]',
+                'HOLO-[ACYL-CARRIER\nPROTEIN]',
+                'Cl(-)',
+                'Fe(2+)',
+                'IDP',  # known has intrinsically disordred protein
+                # 'acetyl-CoA(4-)',
+                'CoA',
+                'GTP',
+                'UTP(3-)',
+                'CTP(3-)',
+                'dioxygen',
+                'AMP',
                 'H2O',
                 'ADP',
                 'ATP',
                 'Diphosphate',
                 'Phosphate',
+                'phosphate',
                 'UDP',
                 'Coenzyme-A',
                 'Nicotinamide-adenine-dinucleotide',
@@ -66,7 +86,7 @@ def _launch_fba(model, objectives, user_params, optimize_sense='maximize'):
 
     :param model: cobrapy model
     :param objectives: reactions list representing objectives function
-    :param user_params: list of dict reactions bounds that has been changed 
+    :param user_params: list of dict reactions bounds that has been changed
                         by user
     :return: solution object
 
@@ -109,9 +129,7 @@ def _add_node(data,
               position,
               bg_color,
               shape='ellipse',
-              show_compound_img=False,
-              backend='sigma'):
-
+              show_compound_img=False):
     """
     css properties are not applied when they are in snakeCase.
     :param entry:
@@ -120,79 +138,49 @@ def _add_node(data,
 
     """
 
-    if backend not in GRAPH_LIBRARY_BACKEND:
-        raise NameError('backend library not in {cytoscape, sigma}')
-
     node_data = {'id': node_id,
-                 #'name': name,
                  'label': name[:10] + '...',
                  'full_name': name,
                  'size': 5,
                  'x': position.x if position is not None else random.random(),
                  'y': position.y if position is not None else random.random(),
-                 'data': {
-                    'flux': flux
-                 }
-                 #'content': name,
-                 #'textValign': 'top',
-                 #'width': 10,
-                 #'height': 10,
-                 #'backgroundColor': bg_color,
-                 #'type': shape,
-                 #'borderColor': '#000000',
-                 #'borderWidth': 4
+                 'flux': flux,
+                 'absflux': abs(flux)
                  }
 
-    # if backend == 'sigma':
-    #     node_data.update(
-    #         {
-    #             'x': position.x if position is not None else random.random(),
-    #             'y': position.y if position is not None else random.random()
-    #         }
-    #     )
+    data['nodes'].append(node_data)
 
-    if backend == 'sigma':
-        data['nodes'].append(node_data)
+
+def _add_edge(data,
+              reaction,
+              edge_id,
+              id1,
+              id2,
+              flux,
+              arrow_src=False,
+              arrow_target=True):
+    """
+    add an edge
+    """
+    if flux < 0:
+        sign = 'neg'
+    elif flux > 0:
+        sign = 'pos'
     else:
-        data['nodes'].append(
-            {
-                'data': node_data,
-                'position':
-                    {'x': position[0],
-                     'y': position[1]},
-                'grabbable': True,
-                'selectable': True,
-                'classes': klass
-            }
-        )
+        sign = 'zero'
 
-
-def _add_edge(data, reaction, edge_id, id1, id2, flux, arrow_src=False, arrow_target=True, backend='sigma'):
-    #concat = '-'.join([str(id1), str(id2), str(index[0]), str(index[1])])  #'-'.join([str(id1), str(id2)])
     edge_data = {'id': edge_id, #reaction.id if reaction is not None else concat,
-                 #'content': reaction.name if reaction is not None else 'NA',
+                 'label': edge_id,
                  'source': id1,
                  'target': id2,
                  'size': 1,
                  'type': 'tapered',
-                 'data': {
-                    'flux': flux,
-                    'reversible': reaction.reversibility
+                 'flux': flux,
+                 'absflux': abs(flux),
+                 'reversible': reaction.reversibility,
+                 'sign': sign
                  }
-                 #'color': '#ccc'
-                 #'targetArrowShape':  'triangle' if arrow_target else 'none',
-                 #'sourceArrowShape':  'triangle' if arrow_src else 'none',
-                 #'flux': flux,
-                 #'absflux': abs(flux)
-                }
-    if backend == 'cytoscape':
-        data['edges'].append(
-            {
-                'data': edge_data
-            }
-        )
-    else:
-        data['edges'].append(edge_data)
+    data['edges'].append(edge_data)
 
 
 def _build_genome_scale_network(model, results):
@@ -209,38 +197,19 @@ def _build_genome_scale_network(model, results):
 
     x_dict = results['x_dict']
 
-    # first pass to get flux for each metabolites
-    # flux_by_metabolites_id = {}
-    # for r in model.reactions:
-    #     f_reactants, f_products = r.reactants, r.products
-    #     reactants = set(f_reactants) - set([m for m in f_reactants if m.name in UNDESIRABLES])
-    #     products = set(f_products) - set([m for m in f_products if m.name in UNDESIRABLES])
-
-    #     flux = x_dict[r.id]
-    #     for e in reactants.union(products):
-    #         flux_by_metabolites_id[e.id] = flux
-
     metabolites_ids, edge_ids = set(), set()
-    # for m in model.metabolites:
-    #     if m.name in UNDESIRABLES or m.compartment == 'e':
-    #         continue
 
-    #     # add the metabolite if not yet added
-    #     if m.id not in metabolites_ids:
-    #         _add_node(data,
-    #                   m.id,
-    #                   'metabolite',
-    #                   m.name,
-    #                   flux_by_metabolites_id[m.id],
-    #                   None,
-    #                   '#FFFFFF')
-    #         metabolites_ids.add(m.id)
+    fluxes_by_metabolites_ids = defaultdict(int)
 
     for r in model.reactions:
         f_reactants, f_products = r.reactants, r.products
 
-        reactants = set(f_reactants) - set([m for m in f_reactants if m.name in UNDESIRABLES]) # set(r.reactants) - UNDESIRABLES
-        products = set(f_products) - set([m for m in f_products if m.name in UNDESIRABLES])
+        reactants = set(f_reactants) - set([m for m in f_reactants
+                                            if m.name in UNDESIRABLES])
+        products = set(f_products) - set([m for m in f_products
+                                          if m.name in UNDESIRABLES])
+
+        reactants = set([m for m in reactants if not m.name.startswith('NAD')])
 
         flux = x_dict[r.id]
         target_to_source = flux <= 0
@@ -254,6 +223,7 @@ def _build_genome_scale_network(model, results):
                           flux,
                           None,
                           '#FFFFFF')
+                fluxes_by_metabolites_ids[reactant.id] += abs(flux)
                 metabolites_ids.add(reactant.id)
             for __, product in enumerate(products):
                 if product.id not in metabolites_ids:
@@ -264,8 +234,12 @@ def _build_genome_scale_network(model, results):
                               flux,
                               None,
                               '#FFFFFF')
+                    fluxes_by_metabolites_ids[product.id] += abs(flux)
                     metabolites_ids.add(product.id)
-                edge_id = '-'.join([str(reactant.id), str(product.id), str(_), str(__)])
+
+                # create an edge id
+                edge_id = '-'.join([str(reactant.id),
+                                    str(product.id), str(_), str(__)])
                 if edge_id not in edge_ids:
                     _add_edge(data,
                               r,
@@ -274,8 +248,12 @@ def _build_genome_scale_network(model, results):
                               product.id if not target_to_source else reactant.id,
                               flux)
                     edge_ids.add(edge_id)
-            #if reactants[0].id in metabolites_ids and products[0].id in metabolites_ids:
-            #    _add_edge(data, r, r.reactants[0].id, r.products[0].id, x_dict[r.id])
+
+    # count total flux for each nodes
+    nodes = data['nodes']
+    for n in nodes:
+        n_id = n['id']
+        n['absflux'] = fluxes_by_metabolites_ids[n_id]
     return data
 
 
