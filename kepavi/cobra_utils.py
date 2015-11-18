@@ -2,9 +2,7 @@ import logging
 import cobra
 from kepavi.kegg_utils import Kegg
 import requests
-import tempfile
 import os
-from itertools import groupby
 from collections import defaultdict
 import random
 
@@ -145,7 +143,7 @@ def _add_node(data,
                  'x': position.x if position is not None else random.random(),
                  'y': position.y if position is not None else random.random(),
                  'flux': flux,
-                 'absflux': abs(flux)
+                 'cumflux': abs(flux)
                  }
 
     data['nodes'].append(node_data)
@@ -168,8 +166,8 @@ def _add_edge(data,
         sign = 'pos'
     else:
         sign = 'zero'
-
-    edge_data = {'id': edge_id, #reaction.id if reaction is not None else concat,
+    print flux, abs(flux)
+    edge_data = {'id': edge_id,
                  'label': edge_id,
                  'source': id1,
                  'target': id2,
@@ -177,7 +175,7 @@ def _add_edge(data,
                  'type': 'tapered',
                  'flux': flux,
                  'absflux': abs(flux),
-                 'reversible': reaction.reversibility,
+                 'reversible': reaction.reversibility if reaction is not None else False,
                  'sign': sign
                  }
     data['edges'].append(edge_data)
@@ -253,7 +251,7 @@ def _build_genome_scale_network(model, results):
     nodes = data['nodes']
     for n in nodes:
         n_id = n['id']
-        n['absflux'] = fluxes_by_metabolites_ids[n_id]
+        n['cumflux'] = fluxes_by_metabolites_ids[n_id]
     return data
 
 
@@ -282,13 +280,6 @@ def build_kegg_network_mixed(pathway,
 
     """
 
-    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate',
-                  'Phosphate', 'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
-                  'Dihydroxyacetone-phosphate', 'Nicotinamide-adenine-dinucleotide',
-                  'Acetyl-CoA', 'Nicotinamide-adenine-dinucleotide-phosphate',
-                  'Nicotinamide-adenine-dinucleotide--reduced',
-                  'Ammonium', 'CO2')
-
     def get_kegg_id(element):
         if "KEGG" in element.notes:
             kegg_notes = element.notes["KEGG"][0].replace(" ", "").split(',')
@@ -300,22 +291,18 @@ def build_kegg_network_mixed(pathway,
         return ''
         # raise ValueError('No KEGG ids found...')
 
-    def add_to_set(element_set, elements):
-        for m in elements:
-            kegg_id = get_kegg_id(m)
-            if kegg_id:
-                element_set.add(kegg_id)
+    def add_node_if_not_drawn(element_set, element, flux):
+        if element.id not in element_set:
+            n = element.name[4:]
+            name = met_name_by_kegg_id[n] if n in met_name_by_kegg_id else None
+            Kegg._add_node(data, element, flux, name=name, show_compound_img=None)
+            element_set.add(element.id)
 
     def is_real_reaction(react):
-        # try:
-        if pathway.entries[react.id].type == 'ortholog':
-            return False
-        return True
-        # except KeyError:
-        #    return False
+        return pathway.entries[react.id].type != 'ortholog'
 
     reac_id_by_kegg_id = {}
-    i = 0
+
     for reac in sbml_model.reactions:
         reac_kegg_ids = get_kegg_id(reac)
         for reac_kegg_id in reac_kegg_ids:
@@ -327,26 +314,10 @@ def build_kegg_network_mixed(pathway,
         for met_kegg_id in met_kegg_ids:
             met_name_by_kegg_id[met_kegg_id] = met.name
 
-            # reactants_set, products_set = set(), set()
-            # add_to_set(reactants_set, reac.reactants)
-            # add_to_set(products_set, reac.products)
-            # reac_id_by_kegg_id[reac.id] = (reactants_set, products_set)
-
     data = {'nodes': [], 'edges': []}
 
-    for entry_id, entry in pathway.entries.iteritems():
-        entry_type = entry.type
-        # if we only focus on the metabolic network, we remove
-        # map and ortholog entries since it is getting more
-        # obfuscated with it.
-        if entry_type != 'compound':  # in {'gene', 'ortholog', 'map', 'enzyme', 'group'}:
-            continue
-
-        n = entry.name[4:] # entry.name
-        name = met_name_by_kegg_id[n] if n in met_name_by_kegg_id else None
-        Kegg._add_node(data, entry, name=name, show_compound_img=None)
-
-    min_flux, max_flux = 1000, -1000
+    metabolites_id = set()
+    fluxes_by_metabolites_ids = defaultdict(int)
 
     for reaction in pathway.reactions:
         if not is_real_reaction(reaction):
@@ -369,41 +340,43 @@ def build_kegg_network_mixed(pathway,
 
         flux = results['x_dict'][matching_reaction] if matching_reaction is not None else 0
 
-        if flux < min_flux:
-            min_flux = flux
-        if flux > max_flux:
-            max_flux = flux
-        # for substrate in reaction.substrates:
-        #     substrate_id = substrate.id
-        #     if reaction.type == 'reversible':
-        #         _add_edge(data, substrate_id, reac_id, flux, arrow_src=True, arrow_target=False)
-        #     else:
-        #         _add_edge(data, substrate_id, reac_id, flux, arrow_src=False, arrow_target=False)
-        #
-        # for product in reaction.products:
-        #     _add_edge(data, reac_id, product.id, flux, arrow_src=False, arrow_target=True)
+        sbml_reaction = None
+        if matching_reaction is not None:
+            sbml_reaction = sbml_model.reactions.get_by_id(matching_reaction)
 
-        sbml_reaction = sbml_model.reactions.get_by_id(matching_reaction) if matching_reaction is not None else None
-
-        for reactant in reaction.substrates:
-            if reactant.name in not_wanted:
+        for _, reactant in enumerate(reaction.substrates):
+            if reactant.name in UNDESIRABLES:
                 continue
+            # add not if does not exist yet
+            fluxes_by_metabolites_ids[reactant.id] += abs(flux)
+            add_node_if_not_drawn(metabolites_id, reactant, flux)
+
             # reac_id = id_by_name[reactant.name]  # if reactant.id
-            for product in reaction.products:
-                if product.name in not_wanted:
+            for __, product in enumerate(reaction.products):
+                if product.name in UNDESIRABLES:
                     continue
+                fluxes_by_metabolites_ids[product.id] += abs(flux)
+                add_node_if_not_drawn(metabolites_id, product, flux)
+
                 # product_id = id_by_name[product.name]  # product.id
                 arrow_src = reaction.type == 'reversible'
+                edge_id = '-'.join([str(reactant.id),
+                                    str(product.id), str(_), str(__)])
 
                 _add_edge(data,
                           sbml_reaction,
+                          edge_id,
                           reactant.id,
                           product.id,
-                          flux, arrow_src=arrow_src)
+                          flux,
+                          arrow_src=arrow_src)
 
-        data['flux_min'] = min_flux
-        data['flux_max'] = max_flux
-
+    # count total flux for each nodes
+    nodes = data['nodes']
+    for n in nodes:
+        n_id = n['id']
+        n['cumflux'] = fluxes_by_metabolites_ids[n_id]
+    print data
     return data
 
 
@@ -417,16 +390,6 @@ def build_cobra_network(sbml_model, results):
     :return:
     """
 
-    not_wanted = ('H', 'H2O', 'ADP', 'ATP', 'Diphosphate', 'Phosphate',
-                  'UDP', 'Coenzyme-A', 'AMP', 'Dihydroxyacetone',
-                  'Dihydroxyacetone-phosphate',
-                  'Nicotinamide-adenine-dinucleotide',
-                  'Acetyl-CoA', 'Nicotinamide-adenine-dinucleotide-phosphate',
-                  'Nicotinamide-adenine-dinucleotide--reduced',
-                  'Ammonium', 'CO2')
-
-    fluxes = [results['x_dict'][_.id] for _ in sbml_model.reactions]
-    flux_min, flux_max = min(fluxes), max(fluxes)
     data = {'nodes': [], 'edges': []}
 
     added_node = set()
@@ -436,29 +399,35 @@ def build_cobra_network(sbml_model, results):
     def add_node(elements):
         for e in elements:
             e_name = e.name
-            if e_name in not_wanted:
+            if e_name in UNDESIRABLES:
                 continue
             e_id = e.id
             if e_name not in added_node:
                 added_node.add(e_name)
                 id_by_name[e_name] = e_id
-                Kegg._add_node(data, e_id, 'metabolites', e.name, None, '#000000')
+                Kegg._add_node(data,
+                               e_id,
+                               'metabolites',
+                               e.name, None,
+                               '#000000')
 
     for reaction in sbml_model.reactions:
         add_node(reaction.reactants)
         add_node(reaction.products)
         for reactant in reaction.reactants:
-            if reactant.name in not_wanted:
+            if reactant.name in UNDESIRABLES:
                 continue
             reac_id = id_by_name[reactant.name]  # if reactant.id
             for product in reaction.products:
-                if product.name in not_wanted:
+                if product.name in UNDESIRABLES:
                     continue
                 product_id = id_by_name[product.name]  # product.id
                 arrow_src = reaction.reversibility
 
-                _add_edge(data, reaction, reac_id, product_id, results['x_dict'][reaction.id], arrow_src=arrow_src)
+                _add_edge(data,
+                          reaction,
+                          reac_id,
+                          product_id,
+                          results['x_dict'][reaction.id],
+                          arrow_src=arrow_src)
     return data
-
-
-
