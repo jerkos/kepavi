@@ -100,6 +100,7 @@ class Kegg(object):
                      'full_name': node_name,
                      'label': node_name,
                      'content': node_name,
+                     'size': 5,
                      'x': graphics.x,
                      'y': graphics.y,
                      'flux': flux,

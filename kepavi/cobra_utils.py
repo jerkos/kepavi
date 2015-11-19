@@ -143,7 +143,7 @@ def _add_node(data,
                  'x': position.x if position is not None else random.random(),
                  'y': position.y if position is not None else random.random(),
                  'flux': flux,
-                 'cumflux': abs(flux)
+                 'cumflux': abs(flux)  # temporary variable
                  }
 
     data['nodes'].append(node_data)
@@ -166,7 +166,7 @@ def _add_edge(data,
         sign = 'pos'
     else:
         sign = 'zero'
-    print flux, abs(flux)
+    
     edge_data = {'id': edge_id,
                  'label': edge_id,
                  'source': id1,
@@ -251,7 +251,7 @@ def _build_genome_scale_network(model, results):
     nodes = data['nodes']
     for n in nodes:
         n_id = n['id']
-        n['cumflux'] = fluxes_by_metabolites_ids[n_id]
+        n['cumflux'] = int(fluxes_by_metabolites_ids[n_id])
     return data
 
 
@@ -289,13 +289,16 @@ def build_kegg_network_mixed(pathway,
             kegg_id = element.annotation['kegg_compound']
             return kegg_id if kegg_id not in ('0', 'NA') else ''
         return ''
-        # raise ValueError('No KEGG ids found...')
 
     def add_node_if_not_drawn(element_set, element, flux):
         if element.id not in element_set:
             n = element.name[4:]
             name = met_name_by_kegg_id[n] if n in met_name_by_kegg_id else None
-            Kegg._add_node(data, element, flux, name=name, show_compound_img=None)
+            Kegg._add_node(data,
+                           element,
+                           int(flux),
+                           name=name,
+                           show_compound_img=None)
             element_set.add(element.id)
 
     def is_real_reaction(react):
@@ -375,7 +378,7 @@ def build_kegg_network_mixed(pathway,
     nodes = data['nodes']
     for n in nodes:
         n_id = n['id']
-        n['cumflux'] = fluxes_by_metabolites_ids[n_id]
+        n['cumflux'] = int(fluxes_by_metabolites_ids[n_id])
     print data
     return data
 

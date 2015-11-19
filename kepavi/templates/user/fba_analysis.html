@@ -59,6 +59,23 @@
             z-index: 25;
         }
 
+        #setting-nav-shower-bis {
+            /*display: none;*/
+            position:fixed;
+            right:0;
+            background-color: white;
+            color: red;
+            border-radius: 5px;
+            z-index: 25;
+            margin-top: 50px;
+        }
+
+        #setting-nav-shower-bis a {
+            text-decoration: none;
+            color: red;
+
+        }
+
         #centered-loader {
             position:absolute;
             top: 50%;
@@ -78,7 +95,7 @@
           background-color: rgb(249, 247, 237);
           box-shadow: 0 2px 6px rgba(0,0,0,0.3);
           border-radius: 6px;
-
+          margin-left: -200px;
         }
 
         .sigma-tooltip-header {
@@ -161,13 +178,20 @@
             font-size: 0.8em;          
          }
     </style>
-    <link href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
 
 {% endblock %}
 
 {% block content %}
     <div id="centered-loader"><span class="fa fa-circle-o-notch fa-spin fa-3x"></span></div>
     <div id="setting-nav-shower"><a class="setting-nav-shower-a" href="#"><span class="fa fa-gg fa-2x"></span></a></div>
+    
+    <div id="setting-nav-shower-bis">
+        <a class="setting-nav-shower-a" href="#">
+            <span class="fa fa-gg fa-2x"></span>
+        </a>
+    </div>
+
+
     <div id="settings-nav" class="container">
         <form>
             <div class="row">
@@ -201,8 +225,11 @@
                 </div>
             </div>
             <div class="row" style="padding-bottom: 20px;">
-                <div class="col-md-12 text-center">
-                    <button class="load-cytoscape-btn btn btn-info">Load pathway</button>
+                <div class="col-md-6 text-center">
+                    <button class="load-cytoscape-btn btn btn-info">add</button>
+                </div>
+                <div class="col-md-6">
+                    <button class="btn btn-warning clear-graph">clear</button>
                 </div>
             </div>
             <h5>3. Customize</h5>
@@ -318,12 +345,23 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                <a href="#" class="apply-edge-type">apply</a>
+                    <a href="#" class="apply-edge-type">apply</a>
                 </div>
             </div>
 
+            <div class="row" style="padding-bottom: 20px;">
+                <div class="col-md-4" style="font-size: 0.8em;">
+                    <span>Background color</span>
+                </div>
+                <div class="col-md-4">
+                    <input id="bg-color-input" type="color"/>
+                </div>
+                <div class="col-md-4">
+                    <a href="#" class="apply-background-color">apply</a>
+                </div>
+            </div>
             <div class="row text-center" style="padding-bottom: 20px;">
-                <button class="btn btn-sucess filter-node">Filter node</button>
+                <button class="btn btn-sucess filter-node">Filter node with degree=0</button>
             </div>
         </form>
     </div>
@@ -419,51 +457,339 @@
                         "json");
             });
 
+            // init empty sigma instance
+            var graph = {'nodes': [], 'edges': []};
+            var edges_ids_set = {};
+            var nb_graph = 0;
+
+            sigma.renderers.def = sigma.renderers.canvas
+            s = new sigma({
+                graph: graph,
+                container: 'cytoscape-container',
+                settings: {
+                    nodeHaloColor: '#ecf0f1',
+                    labelAlignment: 'top',
+                    //edgeHaloColor: '#ecf0f1',
+                    defaultLabelColor: "#fff",
+                    enableNodeHovering: true,
+                    enableEdgeHovering: true,
+                    edgeHoverSizeRatio: 1,
+                    nodeHaloSize: 10,
+                    //edgeHaloSize: 10,
+                    defaultNodeColor: '#ec5148',
+                    //maxEdgeSize: 1,
+                    labelSize: 'proportionnal',
+                    labelColor: 'node',
+                    animationsTime: 2500
+                }
+            });
+
+            // setting styles
+            var myStyles = {
+              nodes: {
+                color: {
+                  by: 'cumflux',
+                  scheme: 'colorbrewer.Blues',
+                  bins: 9
+                },
+                size: {
+                    by: 'cumflux',
+                    min: 0.5,
+                    max: 9,
+                    bins: 9
+                }
+              },
+              edges: {
+                color: {
+                  by: 'flux',
+                  scheme: 'colorbrewer.Greens',
+                  bins: 9
+                },
+                size: {
+                    by: 'absflux',
+                    min: 0.01,
+                    max: 2.5
+                }
+              }
+              
+            };
+            var myPalette = {
+              colorbrewer: {
+                YlGn: sigma.plugins.colorbrewer.YlGn,
+                YlGnBu: sigma.plugins.colorbrewer.YlGnBu,
+                GnBu: sigma.plugins.colorbrewer.GnBu,
+                BuGn: sigma.plugins.colorbrewer.BuGn,
+                PuBuGn: sigma.plugins.colorbrewer.PuBuGn,
+                PuBu: sigma.plugins.colorbrewer.PuBu,
+                BuPu: sigma.plugins.colorbrewer.BuPu,
+                RdPu: sigma.plugins.colorbrewer.RdPu,
+                PuRd: sigma.plugins.colorbrewer.PuRd,
+                OrRd: sigma.plugins.colorbrewer.OrRd,
+                YlOrRd: sigma.plugins.colorbrewer.YlOrRd,
+                YlOrBr: sigma.plugins.colorbrewer.YlOrBr,
+                Purples: sigma.plugins.colorbrewer.Purples,
+                Blues: sigma.plugins.colorbrewer.Blues,
+                Greens: sigma.plugins.colorbrewer.Greens,
+                Oranges: sigma.plugins.colorbrewer.Oranges,
+                Reds: sigma.plugins.colorbrewer.Reds,
+                Greys: sigma.plugins.colorbrewer.Greys,
+                PuOr: sigma.plugins.colorbrewer.PuOr,
+                BrBG: sigma.plugins.colorbrewer.BrBG,
+                PRGn: sigma.plugins.colorbrewer.PRGn,
+                PiYG: sigma.plugins.colorbrewer.PiYG,
+                RdBu: sigma.plugins.colorbrewer.RdBu,
+                RdGy: sigma.plugins.colorbrewer.RdGy,
+                RdYlBu: sigma.plugins.colorbrewer.RdYlBu,
+                Spectral: sigma.plugins.colorbrewer.Spectral,
+                RdYlGn: sigma.plugins.colorbrewer.RdYlGn,
+                Accent: sigma.plugins.colorbrewer.Accent,
+                Dark2: sigma.plugins.colorbrewer.Dark2,
+                Paired: sigma.plugins.colorbrewer.Paired,
+                Pastel1: sigma.plugins.colorbrewer.Pastel1,
+                Pastel2: sigma.plugins.colorbrewer.Pastel2,
+                Pastel3: sigma.plugins.colorbrewer.Pastel3,
+                Set1: sigma.plugins.colorbrewer.Set1,
+                Set2: sigma.plugins.colorbrewer.Set2,
+                Set3: sigma.plugins.colorbrewer.Set3
+              },
+              edgeScheme: {
+                'pos': '#00ff00',
+                'neg': '#ff0000',
+                'zero': '#d3d3d3'
+              }
+            };
+
+            // Instanciate the design:
+            var design = sigma.plugins.design(s, {
+                styles: myStyles,
+                palette: myPalette
+            });
+
+            // drag plugin
+            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
+
+            // halo rendering
+            function renderHalo() {
+              s.renderers[0].halo({
+                nodes: s.graph.nodes()
+              });
+            }
+
+            // //renderHalo();
+
+            // s.renderers[0].bind('render', function(e) {
+            //   //renderHalo();
+            // });
+
+            // s.bind('clickStage', function(e) {
+            //   //renderHalo();
+            // });
+
+            s.bind('hovers', function(e) {
+              var adjacentNodes = [],
+                  adjacentEdges = [];
+
+
+                if (e.data.leave.nodes.length) {
+                    console.log('leaving...');
+                    s.renderers[0].halo({
+                        nodes: [], //adjacentNodes,
+                        edges: [] //adjacentEdges
+                      });
+                    return;
+                }
+
+              if (!e.data.enter.nodes.length) 
+                return;
+
+              // Get adjacent nodes:
+              e.data.enter.nodes.forEach(function(node) {
+                adjacentNodes = adjacentNodes.concat(s.graph.adjacentNodes(node.id));
+              });
+
+              // Add hovered nodes to the array and remove duplicates:
+              adjacentNodes = adjacentNodes.concat(e.data.enter.nodes);
+
+              // Get adjacent edges:
+              e.data.enter.nodes.forEach(function(node) {
+                adjacentEdges = adjacentEdges.concat(s.graph.adjacentEdges(node.id));
+              });
+
+              // Remove duplicates:
+              adjacentEdges = adjacentEdges;
+
+              // Render halo:
+              s.renderers[0].halo({
+                nodes: adjacentNodes,
+                edges: adjacentEdges
+              }); 
+            }); // end bind hovers
+            
+            
+            function hideNodeBasedOnDegree() {
+                s.graph.nodes().forEach(function(node){
+                    if (node.degree == 0) {
+                        node.hidden = true;
+                    }
+                });
+                s.refresh();
+            }
+
+            function cleanGraph() {
+                s.graph.clear();
+                s.refresh();
+            }
+
+            // may be difficult because have to ensure
+            // that any id already exists
+            function addNodesAndEdges(dat) {
+                var g = JSON.parse(dat);
+                var nodes = g['nodes'];
+                console.log(nodes);
+                var edges = g['edges'];
+
+                for (var i=0; i < nodes.length; ++i) {
+                    var n = nodes[i];
+                    s.graph.addNode(n);
+                }
+
+                for(var j=0; j < edges.length; ++j) {
+                    var e = edges[j];
+                    var e_id = e['id'];
+                    if (! (e_id in edges_ids_set)) {
+                        edges_ids_set[e_id] = true;
+                        s.graph.addEdge(e);
+                    } else {
+                        if (nb_graph > 0) {
+                            var new_e_id = e_id + '-' + nb_graph;
+                            edges_ids_set[new_e_id] = true;
+                            e['id'] = new_e_id;
+                            s.graph.addEdge(e);
+                        }
+                    }
+                }
+                nb_graph++;
+            }
+
+
+            // hide all nodes with degree < 0
+            $('.filter-node').on('click', function(e){
+                e.preventDefault();
+                hideNodeBasedOnDegree();
+
+            });
+
+            // tooltips configuration
+            var config = {
+              node: {
+                show: 'clickNode',
+                //hide: 'hovers',
+                cssClass: 'sigma-tooltip',
+                position: 'top',
+                // autoadjust: false,
+                template:
+                '<div class="arrow"></div>' +
+                ' <div class="sigma-tooltip-header">\{\{full_name\}\}</div>' +
+                '  <div class="sigma-tooltip-body">' +
+                '    <table>' +
+                '      <tr><th>flux</th> <td>\{\{flux\}\}</td></tr>' +
+                '      <tr><th>cumulative flux</th> <td>\{\{cumflux\}\}</td></tr>' +
+                '    </table>' +
+                '  </div>' +
+                '  <div class="sigma-tooltip-footer">Number of connections: \{\{degree\}\}</div>',
+                renderer: function(node, template) {
+                  // The function context is s.graph
+                  // node.degree = this.degree(node.id);
+
+                  // Returns an HTML string:
+                  return Mustache.render(template, node);
+
+                  // Returns a DOM Element:
+                  //var el = document.createElement('div');
+                  //return el.innerHTML = Mustache.render(template, node);
+                }
+              }
+            };
+
+            // Instanciate the tooltips plugin with a Mustache renderer for node tooltips:
+            var tooltips = sigma.plugins.tooltips(s, s.renderers[0], config);
+
+            // initialize legend
+            var legend = sigma.plugins.legend(s);
+            legend.setPlacement('left');
+           
+           // node color select
+           $('.apply-node-color').on('click', function(e){
+                e.preventDefault();
+                var selected = $('.node-color-select option:selected').text();
+                design.nodesBy('color', {
+                    by: 'cumflux',
+                    scheme: 'colorbrewer.' + selected,
+                  });
+                design.apply();
+            });
+
+           // node color select
+           $('.apply-node-color').on('click', function(e){
+                e.preventDefault();
+                var selected = $('.edge-color-select option:selected').text();
+                design.edgesBy('color', {
+                    by: 'flux',
+                    scheme: 'colorbrewer.' + selected,
+                  });
+                design.apply();
+            });
+
+           // aplly edge color mapping
+           $('.apply-edge-type').on('click', function(e){
+                e.preventDefault();
+                var selected = $('.edge-type-select option:selected').text();
+                s.graph.edges().forEach(function(edge){
+                    edge.type = selected;
+                });
+                s.refresh();
+           });
+
+           // apply background color
+           $('.apply-background-color').on('click', function(e){
+                e.preventDefault();
+                var bg_color = $('#bg-color-input').val();
+                $('#cytoscape-container').css('background-color', '' + bg_color);
+           });
+
+           $('.clear-graph').on('click', function(e){
+                e.preventDefault();
+                cleanGraph();
+           });
+
+           s.refresh();
+            
             /** get some kgml data */
             $('.load-cytoscape-btn').on('click', function(evt){
                 evt.preventDefault();
                 var pathway_id = pathway_selector.val();
                 var pathway_name = $('.pathway_selector option:selected').text();
-                console.log(pathway_name);
                 $('#centered-loader').css('display', 'inline');
                 $.get("{{ url_for('user.get_kgml', username=current_user.username) }}?pathway_name=" + pathway_name + "&pathway_id=" + pathway_id + "&analysis_id=" + "{{ analysis.id }}",
                         function(data){
+                            // add nodes 
+                            addNodesAndEdges(data);
+                            // update design
+                            design.apply();
 
-                            sigma.renderers.def = sigma.renderers.canvas
-                            s = new sigma({
-                                graph: JSON.parse(data),
-                                container: 'cytoscape-container',
-                                //type: 'canvas',
-                                settings: {
-                                    nodeHaloColor: '#ecf0f1',
-                                    labelAlignment: 'top',
-                                    //edgeHaloColor: '#ecf0f1',
-                                    defaultLabelColor: "#fff",
-                                    enableNodeHovering: true,
-                                    enableEdgeHovering: true,
-                                    edgeHoverSizeRatio: 1,
-                                    nodeHaloSize: 10,
-                                    //edgeHaloSize: 10,
-                                    //defaultNodeColor: '#ec5148'
-                                    //maxEdgeSize: 1,
-                                    labelSize: 'proportionnal',
-                                    labelColor: 'node',
-                                    animationsTime: 2500
-                                }
-                            });
                             // setting node degree
                             s.graph.nodes().forEach(function(node){
-                                var degree = parseInt(s.graph.degree(node.id));
-                                console.log(degree);
-                                if (degree !== undefined)
-                                    node.degree = degree;
-                                else
-                                    node.degree = 0;
+                                if (node.degree === undefined) {
+                                    var degree = parseInt(s.graph.degree(node.id));
+                                    if (degree !== undefined)
+                                        node.degree = degree;
+                                    else
+                                        node.degree = 0;
+                                }
                             });
 
-
+                            // configure force links layout
                             if (pathway_name == 'Whole model') {
-                                // configure force links layout
                                 var fa = sigma.layouts.configForceLink(s, {
                                   worker: true,
                                   barnesHutOptimize: false,
@@ -480,239 +806,13 @@
 
                                 sigma.layouts.startForceLink();
                             }
-                            // drag plugin
-                            var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
-
-                            // halo rendering
-                            function renderHalo() {
-                              s.renderers[0].halo({
-                                nodes: s.graph.nodes()
-                              });
-                            }
-
-                            // //renderHalo();
-
-                            // s.renderers[0].bind('render', function(e) {
-                            //   //renderHalo();
-                            // });
-
-                            // s.bind('clickStage', function(e) {
-                            //   //renderHalo();
-                            // });
-
-                            s.bind('hovers', function(e) {
-                              var adjacentNodes = [],
-                                  adjacentEdges = [];
-
-
-                                if (e.data.leave.nodes.length) {
-                                    console.log('leaving...');
-                                    s.renderers[0].halo({
-                                        nodes: [], //adjacentNodes,
-                                        edges: [] //adjacentEdges
-                                      });
-                                    return;
-                                }
-
-                              if (!e.data.enter.nodes.length) 
-                                return;
-
-
-
-                              // Get adjacent nodes:
-                              e.data.enter.nodes.forEach(function(node) {
-                                adjacentNodes = adjacentNodes.concat(s.graph.adjacentNodes(node.id));
-                              });
-
-                              // Add hovered nodes to the array and remove duplicates:
-                              adjacentNodes = adjacentNodes.concat(e.data.enter.nodes);
-
-                              // Get adjacent edges:
-                              e.data.enter.nodes.forEach(function(node) {
-                                adjacentEdges = adjacentEdges.concat(s.graph.adjacentEdges(node.id));
-                              });
-
-                              // Remove duplicates:
-                              adjacentEdges = adjacentEdges;
-
-                              // Render halo:
-                              s.renderers[0].halo({
-                                nodes: adjacentNodes,
-                                edges: adjacentEdges
-                              }); 
-                            }); // end bind hovers
-                            
-                            
-                            function hideNodeBasedOnDegree() {
-                                s.graph.nodes().forEach(function(node){
-                                    if (node.degree == 0) {
-                                        node.hidden = true;
-                                    }
-                                });
-                                s.refresh();
-                            }
-
-                            $('.filter-node').on('click', function(e){
-                                e.preventDefault();
-                                hideNodeBasedOnDegree();
-
-                            });
-
-                            // tooltips configuration
-                            var config = {
-                              node: {
-                                show: 'clickNode',
-                                //hide: 'hovers',
-                                cssClass: 'sigma-tooltip',
-                                position: 'top',
-                                // autoadjust: false,
-                                template:
-                                '<div class="arrow"></div>' +
-                                ' <div class="sigma-tooltip-header">\{\{full_name\}\}</div>' +
-                                '  <div class="sigma-tooltip-body">' +
-                                '  </div>' +
-                                '  <div class="sigma-tooltip-footer">Number of connections: \{\{degree\}\}</div>',
-                                renderer: function(node, template) {
-                                  // The function context is s.graph
-                                  // node.degree = this.degree(node.id);
-
-                                  // Returns an HTML string:
-                                    console.log(template);
-                                    console.log(node);
-                                  return Mustache.render(template, node);
-
-                                  // Returns a DOM Element:
-                                  //var el = document.createElement('div');
-                                  //return el.innerHTML = Mustache.render(template, node);
-                                }
-                              }
-                            };
-
-                            // Instanciate the tooltips plugin with a Mustache renderer for node tooltips:
-                            var tooltips = sigma.plugins.tooltips(s, s.renderers[0], config);
-
-                            // setting styles
-                            var myStyles = {
-                              nodes: {
-                                color: {
-                                  by: 'cumflux',
-                                  scheme: 'colorbrewer.Blues',
-                                  bins: 9
-                                },
-                                size: {
-                                    by: 'cumflux',
-                                    min: 0.5,
-                                    max: 9,
-                                    bins: 9
-                                }
-                              },
-                              edges: {
-                                color: {
-                                  by: 'flux',
-                                  scheme: 'colorbrewer.Greens',
-                                  bins: 9
-                                },
-                                size: {
-                                    by: 'absflux',
-                                    min: 0.01,
-                                    max: 2.5
-                                }
-                              }
-                              
-                            };
-                            var myPalette = {
-                              colorbrewer: {
-                                YlGn: sigma.plugins.colorbrewer.YlGn,
-                                YlGnBu: sigma.plugins.colorbrewer.YlGnBu,
-                                GnBu: sigma.plugins.colorbrewer.GnBu,
-                                BuGn: sigma.plugins.colorbrewer.BuGn,
-                                PuBuGn: sigma.plugins.colorbrewer.PuBuGn,
-                                PuBu: sigma.plugins.colorbrewer.PuBu,
-                                BuPu: sigma.plugins.colorbrewer.BuPu,
-                                RdPu: sigma.plugins.colorbrewer.RdPu,
-                                PuRd: sigma.plugins.colorbrewer.PuRd,
-                                OrRd: sigma.plugins.colorbrewer.OrRd,
-                                YlOrRd: sigma.plugins.colorbrewer.YlOrRd,
-                                YlOrBr: sigma.plugins.colorbrewer.YlOrBr,
-                                Purples: sigma.plugins.colorbrewer.Purples,
-                                Blues: sigma.plugins.colorbrewer.Blues,
-                                Greens: sigma.plugins.colorbrewer.Greens,
-                                Oranges: sigma.plugins.colorbrewer.Oranges,
-                                Reds: sigma.plugins.colorbrewer.Reds,
-                                Greys: sigma.plugins.colorbrewer.Greys,
-                                PuOr: sigma.plugins.colorbrewer.PuOr,
-                                BrBG: sigma.plugins.colorbrewer.BrBG,
-                                PRGn: sigma.plugins.colorbrewer.PRGn,
-                                PiYG: sigma.plugins.colorbrewer.PiYG,
-                                RdBu: sigma.plugins.colorbrewer.RdBu,
-                                RdGy: sigma.plugins.colorbrewer.RdGy,
-                                RdYlBu: sigma.plugins.colorbrewer.RdYlBu,
-                                Spectral: sigma.plugins.colorbrewer.Spectral,
-                                RdYlGn: sigma.plugins.colorbrewer.RdYlGn,
-                                Accent: sigma.plugins.colorbrewer.Accent,
-                                Dark2: sigma.plugins.colorbrewer.Dark2,
-                                Paired: sigma.plugins.colorbrewer.Paired,
-                                Pastel1: sigma.plugins.colorbrewer.Pastel1,
-                                Pastel2: sigma.plugins.colorbrewer.Pastel2,
-                                Pastel3: sigma.plugins.colorbrewer.Pastel3,
-                                Set1: sigma.plugins.colorbrewer.Set1,
-                                Set2: sigma.plugins.colorbrewer.Set2,
-                                Set3: sigma.plugins.colorbrewer.Set3
-                              },
-                              edgeScheme: {
-                                'pos': '#00ff00',
-                                'neg': '#ff0000',
-                                'zero': '#d3d3d3'
-                              }
-                          };
-
-                              // Instanciate the design:
-                              var design = sigma.plugins.design(s, {
-                                styles: myStyles,
-                                palette: myPalette
-                              });
-                              design.apply();
-
-                            // initialize legend
-                            var legend = sigma.plugins.legend(s);
-                           
-                           // node color select
-                           $('.apply-node-color').on('click', function(e){
-                                e.preventDefault();
-                                var selected = $('.node-color-select option:selected').text();
-                                design.nodesBy('color', {
-                                    by: 'absflux',
-                                    scheme: 'colorbrewer.' + selected,
-                                  });
-                                design.apply();
-                            });
-
-                           // node color select
-                           $('.apply-node-color').on('click', function(e){
-                                e.preventDefault();
-                                var selected = $('.edge-color-select option:selected').text();
-                                design.edgesBy('color', {
-                                    by: 'flux',
-                                    scheme: 'colorbrewer.' + selected,
-                                  });
-                                design.apply();
-                            });
-
-                           $('.apply-edge-type').on('click', function(e){
-                                e.preventDefault();
-                                var selected = $('.edge-type-select option:selected').text();
-                                s.graph.edges().forEach(function(edge){
-                                    edge.type = selected;
-                                });
-                                s.refresh();
-                           });
-
-                           s.refresh();
+                            legend.draw();
+                            s.refresh();
                             $('#centered-loader').css('display', 'none');
-                        }
-                );
+                        }                           
+                    );
             });
-                           
         });
+
     </script>
 {% endblock %}
