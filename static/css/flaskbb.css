@@ -63,7 +63,9 @@ body {
     border: 1px solid #B6B6B6;
 }
 
-.main-sidebar {}
+.main-sidebar {
+  font-family: 'Oswald', sans-serif;
+}
 
 .sidebar-menu {
     background-color: #FFFFFF;

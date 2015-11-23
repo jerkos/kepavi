@@ -49,22 +49,24 @@
     <div class="launch row ">
       <div class=col-md-6>
         <div class="list-group">
-          <a href="#" class="list-group-item active">
-            <h4 class="list-group-item-heading">Annotation analysis</h4>
+          <a href="#" class="list-group-item annot-task disabled">
+            <h4 class="list-group-item-heading">Database search <small><span class="label label-primary">soon</span><small></h4>
             <p class="list-group-item-text" style="font-size:0.8em;">
               Uploading a peaklist from the output of XCMS for example and
               perform annotation analysis using mzOS software.
               <!-- <a href="http://jerkos.github.io/mzOS">mzOS software</a>. -->
             </p>
           </a>
-          <a href="{{url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug)}}" class="list-group-item">
+          <a href="{{url_for('user.create_fba_analysis', username=current_user.username, project_id=project.id, slug=project.slug)}}" class="list-group-item active fba-task">
             <h4 class="list-group-item-heading">Flux balance analysis</h4>
             <p class="list-group-item-text" style="font-size:0.8em;">
               Choose your organism and perform simple Flux Balance Analysis using
-              cobrapy software.
+              COBRAPY software.
             </p>
           </a>
         </div>
       </div>
     </div>
+{% endblock %}
+{% block javascript %}
 {% endblock %}

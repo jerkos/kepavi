@@ -35,9 +35,9 @@
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
 
         {% block css %}
-            <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+            {# <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'> #}
             <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-            <link href='https://fonts.googleapis.com/css?family=Oswald:300' rel='stylesheet' type='text/css'>
+            {# <link href='https://fonts.googleapis.com/css?family=Oswald:300' rel='stylesheet' type='text/css'> #}
             <link href='https://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
@@ -49,16 +49,16 @@
                     width:100%;
                 }
                  .navbar {
-                    padding: 0 16% 0 16%;
+                    padding: 0 16% 0 10%;
                     margin-bottom: 0
                 }
-               /* .navbar .container {
+              /*  .navbar .container {
                     margin: 0;
-                }
-                .navbar {
+                }*/
+                /*.navbar {
                     width: 100%;
-                }
-*/
+                }*/
+
             </style>
         {% endblock %}
     </head>
@@ -79,12 +79,31 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                   <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('home.index') }}#prices"><span class="fa fa-map"></span> Projects</a></li>
-                    <li><a href="{{ url_for('home.index') }}#doc"><span class="fa fa-map-marker"></span> Doc</a></li>
+                    <li>
+                        <a href="{{ url_for('home.index') }}#prices">
+                            <span class="fa fa-dashboard"></span> Prices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('home.index') }}#doc">
+                            <span class="fa fa-map-marker"></span> Doc
+                        </a>
+                    </li>
+                     <li>
+                        <a href="#">
+                            <span class="fa fa-user"></span> Contact
+                        </a>
+                    </li>
                   </ul>
-                  <ul class="nav pull-right">
-                    <li><a href="#"><span class="fa fa-sign-out"></span> logout</a></li>
-
+                  <ul class="nav navbar-nav pull-right">
+                    <li>
+                        <img style="display:inline; margin-top: 10px;" class="img-circle" src='{{ current_user.email | gravatar(size=40) }}' height="40"/>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <span class="fa fa-sign-out"></span> logout
+                        </a>
+                    </li>
                   </ul>
                 </div><!--/.nav-collapse -->
               </div>
@@ -103,10 +122,10 @@
                                 <li class="brand">
                                     <div class="container">
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            {# <div class="col-md-6">
                                                 <img src="{{ url_for('static', filename='img/marc-dubois.jpg') }}" class="img-circle" width="100" height="100"/>
-                                            </div>
-                                            <div class="col-md-6">
+                                            </div> #}
+                                            <div class="col-md-12">
                                                 <p style="padding-top: 20px;">
                                                      <strong>{{ current_user.username }}</strong><br/>
                                                     <span class="label label-info">Beginner</span>
@@ -117,16 +136,25 @@
                                 </li>
                                 <li class="divider"></li>
                                 <li data-toggle="tooltip" data-placement="right" title="See your projects and modify your account parameters">
-                                    <a href="{{ url_for('user.profile', username=current_user.username) }}">Projects</a>
+                                    <a href="{{ url_for('user.profile', username=current_user.username) }}">
+                                        <span class="fa fa-map"></span> Projects
+                                    </a>
                                 </li>
-                                <li data-toggle="tooltip" data-placement="right" title="Performs deisotoping and
-                                fragments/adducts reasearch in your peaklist using heuristics and bayesian techniques.">
-                                    <a href="#">Peaklist denoising</a>
+                                 <li data-toggle="tooltip" data-placement="right" title="Create and modify your own models">
+                                    <a href="{{ url_for('user.profile', username=current_user.username) }}">
+                                        <span class="fa fa-camera-retro"></span> Models
+                                    </a>
                                 </li>
-                                <li data-toggle="tooltip" data-placement="right" title="Research compounds in HMDB, LMDB or Kegg databases.">
-                                    <a href="#">Database annotation</a>
+                                <li data-toggle="tooltip" data-placement="right" title="Research compounds in HMDB, LMDB or Kegg databases." class="disabled">
+                                    <a href="#">
+                                        <span class="fa fa-bullseye"></span> Database annotation <small><span class="label label-primary">soon</span></small>
+                                    </a>
                                 </li>
-                                <li data-toggle="tooltip" data-placement="right" title="Perform flux analyses using CobraPy"><a href="#">Flux analysis</a></li>
+                                <li data-toggle="tooltip" data-placement="right" title="Perform flux analyses using CobraPy">
+                                    <a href="#">
+                                        <span class="fa fa-rocket"></span> Flux analysis
+                                    </a>
+                                </li>
                             </ul>
                             <!-- {%  if current_user.is_authenticated() %}
                                 <a style="margin-top: 50px;" href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-block">Logout</a>
@@ -134,7 +162,7 @@
                                 <a style="margin-top: 50px;" href="{{ url_for('auth.login') }}" class="btn btn-primary btn-block">Login</a>
                             {% endif %} -->
                         </div>
-                        <div class="sidebar-stats">
+                        {# <div class="sidebar-stats">
                             <ul class="nav nav-stacked">
                                 <li class="sidebar-title"><strong>Statistics</strong></li>
                                 <li class="divider"></li>
@@ -142,7 +170,7 @@
                                 <li><strong><span class="fa fa-briefcase text-muted"></span> Projects:</strong> <em>456</em></li>
                                 <li><strong><span class="fa fa-flask text-muted"></span> Metabolites:</strong> <em>1598864</em></li>
                             </ul>
-                        </div>
+                        </div> #}
                     </div>
 
                     <div class="col-md-10 main-content">

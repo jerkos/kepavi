@@ -1,4 +1,3 @@
-import bioservices
 from kepavi.biomodels import BiomodelMongo
 from kepavi.user.models import User, Biomodel
 import os
@@ -53,7 +52,10 @@ def initdb():
 
     # use only get memory error otherwise
     # print BiomodelMongo.objects.only('organism', 'name').all()
-    mongo_list = dict((b.organism, b.name) for b in BiomodelMongo.objects.only('organism', 'name').all())
+    mongo_list = dict(
+        (b.organism, b.name)
+        for b in BiomodelMongo.objects.only('organism', 'name').all()
+        )
 
     mongo_orgs = set(mongo_list.keys())
 
@@ -74,7 +76,7 @@ def initdb():
                 kegg_names.add(tax)
 
     # insert user
-    u = User(username='marco',email='cram@hotmail.fr', password='Marco@1986')
+    u = User(username='marco', email='cram@hotmail.fr', password='Marco@1986')
     u.save()
 
     logging.info('Done !')
@@ -154,13 +156,19 @@ def insert_models():
 
         i += 1
         if i > 0:
-            logging.info("complete: {}%, success: {}%".format(round((i / l) * 100), round((success/i) * 100)))
+            logging.info("complete: {}%, success: {}%".format(
+                round((i / l) * 100), round((success/i) * 100)))
+        try:
+            os.remove(m)
+        except OSError:
+            logging.warn('Enable to remove file {}'.format(m))
 
 
 @manager.command
 def test_read_models():
     m = BiomodelMongo.objects(organism='sse').first()
-    import cobra.io, json
+    import cobra.io
+    import json
     try:
         s = json.dumps(m.model).encode('utf-8')
         with open('test.json', 'w') as f:

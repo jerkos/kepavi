@@ -57,7 +57,7 @@
                 }
 
                  .navbar {
-                        padding: 0 16% 0 16%;
+                        padding: 0 16% 0 10%;
                         margin-bottom: 0
                     }
             </style>
@@ -136,9 +136,17 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                   <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('home.index') }}#prices">Prices</a></li>
-                    <li><a href="#">Doc</a></li>
-                    <li><a href="#">Contact</a></li>
+                    <li>
+                        <a href="{{ url_for('home.index') }}#prices">
+                            <span class="fa fa-dashboard"></span> Prices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"><span class="fa fa-map-marker"></span> Doc</a>
+                    </li>
+                    <li>
+                        <a href="#"><span class="fa fa-user"></span> Contact</a>
+                    </li>
                   </ul>
                     <ul class="nav pull-right">
                         <!--navbar-right-->
