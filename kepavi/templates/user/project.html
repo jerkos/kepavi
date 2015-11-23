@@ -32,7 +32,11 @@
                             &bull;
                             <span class="text-muted">created {{ analysis.creation_date | time_since }}</span>
                             &bull;
-                            <small><a href="#"><span class="text-muted fa fa-download"></span> download result file</a></small>
+                            <small>
+                              <a href="{{ url_for('user.download', username=current_user.username, project_id=project.id, analysis_id=analysis.id) }}">
+                                <span class="text-muted fa fa-download"></span> download
+                              </a>
+                            </small>
                         </h4>
                     {% endfor %}
                 </div>

@@ -15,7 +15,7 @@ import logging
 from kepavi.cobra_utils import _launch_fba, build_kegg_network_mixed,\
                                _build_genome_scale_network
 from kepavi.kegg_utils import Kegg, Organism
-from kepavi.utils import s3_upload_from_server
+from kepavi.utils import s3_upload_from_server, download_from_s3
 from kepavi.private_keys import S3_URL
 import os
 # from datetime import datetime
@@ -25,7 +25,7 @@ from kepavi.user.models import Project, Analysis, User, Biomodel
 from kepavi.auth.forms import LoginForm
 
 import requests
-from flask import Blueprint, flash, request, redirect, url_for, render_template
+from flask import Blueprint, flash, request, redirect, url_for, render_template, Response
 from flask_login import login_required, current_user
 
 from requests.packages.urllib3.exceptions import ConnectionError
@@ -57,7 +57,8 @@ def create_project(username):
     if form.validate_on_submit():
         p = Project(title=form.title.data, user_id=current_user.id)
         p.save()
-        return redirect(url_for('user.profile', username=current_user.username))
+        return redirect(url_for('user.profile',
+                                username=current_user.username))
     return render_template('errors/server_error.html')
 
 
@@ -68,7 +69,9 @@ def create_fba_analysis(username, project_id, slug):
     form = CreateFBAAnalysisForm()
     form.set_models(u)
     p = Project.query.filter(Project.id == project_id).first_or_404()
-    return render_template('user/create_fba_analysis.html', form=form, project=p)
+    return render_template('user/create_fba_analysis.html',
+                           form=form,
+                           project=p)
 
 
 @user.route('/<username>/get_sbml_reactions')
@@ -211,7 +214,7 @@ def get_kgml(username):
     main function to visualize network
     return json encoded graph
     """
-    
+
     pathway_id = request.args.get('pathway_id')
     if pathway_id is None:
         return json.dumps([])
@@ -248,6 +251,19 @@ def get_kgml(username):
             return render_template('errors/page_not_found.html'), 404
 
         kegg_model_name = request.args.get('pathway_name')
-        cytoscape_formatted = build_kegg_network_mixed(kegg_model, kegg_model_name, model, results)
-
+        cytoscape_formatted = build_kegg_network_mixed(kegg_model,
+                                                       kegg_model_name,
+                                                       model,
+                                                       results)
     return json.dumps(cytoscape_formatted)
+
+
+@user.route('/<username>/download/<project_id>/<analysis_id>')
+@login_required
+def download(username, project_id, analysis_id):
+    filename = '{}/{}/{}'.format(username, project_id, analysis_id)
+    text = download_from_s3(S3_URL, filename)
+    if text is None:
+        return render_template('errors/server_error.html'), 500
+    f = filename.replace('/', '-') + '.json'
+    return Response(text, headers={'Content-Disposition':'attachment;filename=' + f})

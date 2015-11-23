@@ -93,3 +93,15 @@ def random_email(prefix=(2, 8), domain=(5, 20), sufix=(2, 4)):
     s = random.randrange(*sufix)
 
     return '{}@{}.{}'.format("".join(sample_wr(l, p)), "".join(sample_wr(l, d)), "".join(sample_wr(l, s)))
+
+
+def download_from_s3(prefix, filename):
+    import requests
+    try:
+        resp = requests.get(prefix + filename)
+    except ConnectionError:
+        return None
+    # return error code if request failed
+    if resp.status_code != 200:
+        return None
+    return resp.text
