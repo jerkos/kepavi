@@ -266,4 +266,6 @@ def download(username, project_id, analysis_id):
     if text is None:
         return render_template('errors/server_error.html'), 500
     f = filename.replace('/', '-') + '.json'
-    return Response(text, headers={'Content-Disposition':'attachment;filename=' + f})
+    return Response(text,
+                    mimetype='application/json',
+                    headers={'Content-Disposition':'attachment;filename=' + f})
