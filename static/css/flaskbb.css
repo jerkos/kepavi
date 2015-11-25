@@ -38,8 +38,8 @@ body {
 #navbar .nav li a:hover {
     color:#7C4DFF;
     /*background-color: inherit;*/
-    /*background-color:white;*/
-    background-color: #BBDEFB;
+    background-color:white;
+    /*background-color: #BBDEFB;*/
 
 }
 
@@ -111,6 +111,10 @@ body {
 .sidebar-title {
     font-size: 1.6em;
     padding-bottom: 20px;
+}
+
+.purple {
+    color:#7C4DFF;
 }
 
 

@@ -93,7 +93,7 @@ def get_sbml_reactions(username):
     # TODO get the sbml model from mongodb
     sbml_model = model.get_cobra_model()
     if sbml_model is None:
-        return render_template('errors/server_error.html')
+        return render_template('errors/server_error.html', form=LoginForm())
     d = []
     for r in sbml_model.reactions:
         d.append({

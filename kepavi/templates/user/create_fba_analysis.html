@@ -41,28 +41,31 @@
         .purple {
             color:#7C4DFF;
         }
+
+        .banger {
+            font-family: 'Bangers', cursive;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
 
     <div class="row">
-        <h1>Create new Flux Balance Analysis</h1>
+        <h1 class="purple banger">Create new Flux Balance Analysis</h1>
         <hr/>
     </div>
 
     <div class="alert alert-info alert-dismissible">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <p style="font-size:0.8em;">Sbml models must have Kegg informations IDs for reactions and metabolites (in their <code>notes</code> tag)in order to have a proper
-        visualization respecting Kegg maps layout. To see proper example, see those models taken from
-        <a href="http://www.ebi.ac.uk/biomodels-main">Biomodels</a>.</p>
+        <p style="font-size:0.8em;">
+            <a href="http://www.sbml.org">SBML</a> models must have <a href="">KEGG</a> informations IDs for reactions and metabolites (in their <code>notes</code> tag)in order to have a proper visualization respecting KEGG maps layout. To see proper example, see those models taken from <a href="http://www.ebi.ac.uk/biomodels-main">Biomodels</a>.</p>
     </div>
 
     <form id="my-crazy-form">
         {{ form.hidden_tag() }}
 
         <div class="row" style="padding: 0 5%;">
-                <h2 class="purple">1. Informations</h2>
+                <h2 class="purple banger">1. Informations</h2>
                 <hr>
 
                 <div class="form-group {%- if form.title.errors %} has-error{%- endif %}">
@@ -115,7 +118,7 @@
 
             </div>
             <div class="row" style="padding: 0 5%;">
-                <h2 class="purple">2. Modify constraints</h2>
+                <h2 class="purple banger">2. Modify constraints</h2>
                 <hr>
                 <p class="help-block" style="font-size:0.8em;">You can change constraints applied to the model. Just select a reaction and
                     click <em>modify constraint</em>. Then, adapt constraints as you want. Negative lower bound
