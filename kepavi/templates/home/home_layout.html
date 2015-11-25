@@ -18,6 +18,10 @@
             min-width: 100%;
         }
 
+        #wrap {
+            margin-top: 0;
+        }
+
         .jumbotron {
             color: white;
             min-width: 100%;
@@ -49,7 +53,8 @@
         }
 
         .blank-link{
-            color:#0d47a1;
+            text-decoration: none;
+            color: purple; /*#0d47a1;*/
 {#            border-bottom: 2px solid #D26911;#}
         }
 
@@ -63,8 +68,8 @@
         }
 
         .quotted {
-            font-size:3em;
-            padding: 1.6em 0;
+            font-size:2em;
+            padding: 2em 0;
             color:white;
         }
 
@@ -99,7 +104,7 @@
         }
 
         .prices {
-            min-height:570px;
+            /*min-height:570px;*/
         }
 
         .parallax {
@@ -112,7 +117,10 @@
 
         .opt-wrapper {
             text-align: center;
-            width: 70%;
+            /*width: 70%;*/
+            box-shadow: 0px 17px 12px 0px rgba(176, 174, 174, 0.79);
+            -moz-box-shadow: 0px 17px 12px 0px rgba(176, 174, 174, 0.79);
+            -webkit-box-shadow: 0px 17px 12px 0px rgba(176, 174, 174, 0.79);
             background-color: lightgray;
             padding: 10px 10px;
 
@@ -123,10 +131,18 @@
 
         <div class="jumbotron">
             <div class="container text-center">
-                <h2 class="text-center" style="margin: 2em;">The <em>best metabolomic software</em> for your needs.</h2>
-                <p><a id="software-chooser" class="custom-button" href="{{ url_for('home.visualization') }}">Start now</a></p>
-                <p class="text-center" style="margin-top: 2em;">Did not find the software you use ? Do not hesitate to <a class="blank-link" href="#">register</a> it.</p>
-                <p style="padding-top: 5px;">Discuss about <em>softwares algorithms, problems, features</em> in our <a class="blank-link" href="#">forums</a>.</p>
+                <h2 class="text-center" style="margin: 2em;">
+                    The <em>best metabolomic software</em> for your needs.
+                </h2>
+                <p>
+                    <a id="software-chooser" class="custom-button" href="{{ url_for('auth.register') }}">Start now</a>
+                </p>
+                <p class="text-center" style="margin-top: 2em;">
+                    You can easily perform Database annotation and <a class="blank-link" href="#">flux metabolomics analysis</a>.
+                </p>
+                <p style="padding-top: 5px;">
+                    Browse our extensive <a class="blank-link" href="#">documentation</a>.
+                </p>
             </div>
         </div>
 {% endblock %}
@@ -137,8 +153,7 @@
                 <h3><span class="purple fa fa-2x fa-cart-plus"></span><br/><br/><strong><em class="purple">2630</em> available models</strong></h3>
                 <p class="text-justify">
                     We offer many models for more flexibility. You work on an unfamiliar organism ... there is a good chance that you will find a corresponding model here !
-                    You can see all available models here: <a href="">Biomodels</a>.
-{#                    We provide all models from <a href="biomodels.org">Biomodels</a>#}
+                    You can see all available models here: <a href="http://biomodels.org">Biomodels</a>.
                 </p>
             </div>
             <div class="col-md-4">
@@ -172,11 +187,13 @@
 
         <div class="row padded-row">
             <h2 id="prices" class="text-center">Prices</h2>
-            <p class="text-block text-center" style="padding-bottom: 20px;">All plans include a free trial of 15 days.</p>
+            <p class="text-block text-center text-muted" >Free while in <label class="label label-primary">beta</label>.</p>
+            <p class="text-info text-center" style="padding-bottom: 20px;">Created data will be deleted when passing in real production mode.</p>
+
         </div>
 {#        <a class="btn btn-default">Start free trial</a>#}
-        <div class="row padded-row prices text-center" style="padding-bottom: 100px;">
-            <div class="col-md-4">
+        <div class="row padded-row prices text-center" style="padding-bottom: 50px;">
+      <!--       <div class="col-md-4">
                 <div class="opt-wrapper center-block option  selected-option">
                     <h3 class="text-center"><span class="fa fa-mortar-board fa-2x"></span> Starter Pack</h3>
                     <hr>
@@ -195,23 +212,23 @@
                     </div>
                     <a href="#" class="btn btn-info">Get this</a>
                 </div>
-            </div>
-            <div class="col-md-4">
+            </div> -->
+            <div class="col-md-4 col-md-offset-4">
                 <div class="opt-wrapper center-block option">
-                    <h3 class="text-center"><span class="fa fa-flask fa-2x"></span> Research Pack</h3>
+                    <h3 class="text-center"><span class="fa fa-flask fa-2x"></span> Nobel Pack</h3>
                     <hr>
-                    <p class="price"><strong>149</strong><small class="text-muted">/ month</small></p>
+                    <p class="price"><strong>0</strong><small class="text-muted">/ month</small></p>
                      <div class="list-group">
-                        <li class="list-group-item"><strong>5</strong> analyses</li>
+                        <li class="list-group-item"><strong>Unlimited</strong> analyses</li>
                         <li class="list-group-item">bandwidth 5Go</li>
                         <li class="list-group-item">Lorem</li>
                         <li class="list-group-item">Ipsum</li>
                     </div>
-                    <a href="#" class="btn btn-info">Get this</a>
+                    <a href="#" data-toggle="modal" data-target="#myModal" class="btn btn-info">Get this</a>
                 </div>
             </div>
 
-            <div class="col-md-4">
+           <!--  <div class="col-md-4">
                 <div class="opt-wrapper center-block option">
                     <h3 class="text-center"><span class="fa fa-rocket fa-2x"></span> Nobel Pack</h3>
                     <hr>
@@ -224,29 +241,20 @@
                     </div>
                     <a href="#" class="btn btn-info">Get this</a>
                 </div>
-            </div>
+            </div> -->
         </div>
 
-{#        <h2 class="text-center">Tutorials</h2>#}
-{#        <div class="row text-center" style="padding-bottom: 50px;">#}
-{#        <iframe width="1000" height="450" src="https://www.youtube.com/embed/on4TMnuYTaU" frameborder="0" allowfullscreen></iframe>#}
-{#        </div>#}
 {% endblock %}
 
 {% block javascript %}
     {{ super() }}
     <script>
-        $(function(){
-{#            $(".option").each(function(){#}
-                $(".option").hover(function(){
-                    console.log("hover");
-                    {#                    $(".option").each(function(){#}
-{#                        $(this).removeClass("selected-option");#}
-{#                    });#}
-                    $(".option").removeClass("selected-option");
-                    $(this).addClass("selected-option");
-                });
-{#            });#}
-        });
+        // $(function(){
+        //     $(".option").hover(function(){
+        //         console.log("hover");
+        //         $(".option").removeClass("selected-option");
+        //         $(this).addClass("selected-option");
+        //     });
+        // });
     </script>
 {% endblock %}
