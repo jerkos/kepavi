@@ -37,7 +37,7 @@
         <!--endlogin model -->
 
     <div class="row">
-        <h1>Projects/Models management</h1>
+        <h1 class="banger purple">Projects/Models management</h1>
         <hr>
     </div>
 
@@ -74,7 +74,7 @@
                     {% endif %}
         </div>
         <div class="col-md-6">
-            <h2>Your models</h2>
+            <h2>Your models <button data-toggle="modal" data-target="#createProjectForm" class="btn btn-success"><span class="fa fa-plus"></span> new model</button></h2>
              {% if current_user.biomodels_diffs | length %}
                 <ul class="nav nav-stacked">
                     {% for model in current_user.biomodels_diffs %}

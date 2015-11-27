@@ -21,6 +21,10 @@
             display: none;
         }
 
+        .small-size {
+            font-size: 0.8em;
+        }
+
         /*.main-sidebar {
             display: none;
         }*/
@@ -40,7 +44,7 @@
             border: 1px solid white;
         }
 
-        #settings-nav {
+        #settings-nav, #customize-nav {
             position: fixed;
             right: 0;
             max-width: 20%;
@@ -50,35 +54,39 @@
             font-size: 0.8em;
         }
 
-        #setting-nav-shower {
+        #customize-nav {
             display: none;
-            position:fixed;
-            right:0;
-            background-color: white;
-            border-radius: 5px;
-            padding: 10px;
-            z-index: 25;
         }
 
-        #setting-nav-shower-bis {
+        #setting-nav-shower {
             /*display: none;*/
             position:fixed;
             right:0;
             background-color: white;
-            color: red;
+            border-radius: 5px;
+            padding: 5px;
+            z-index: 25;
+        }
+
+        #customize-nav-shower {
+            /*display: none;*/
+            position:fixed;
+            right:0;
+            background-color: white;
+            /*color: red;*/
             border-radius: 5px;
             z-index: 25;
             margin-top: 60px;
-            padding: 10px;
+            padding: 5px;
         }
 
-        #setting-nav-shower-bis:hover {
+        #customize-nav-shower:hover, #setting-nav-shower:hover {
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
-        #setting-nav-shower-bis a {
+        #customize-nav-shower a {
             text-decoration: none;
-            color: purple;
+            /*color: purple;*/
 
         }
 
@@ -188,25 +196,28 @@
 {% endblock %}
 
 {% block content %}
+    <!-- LOADER -->
     <div id="centered-loader"><span class="fa fa-circle-o-notch fa-spin fa-3x"></span></div>
+
+    <!-- BUTTONS SETTINGS NAV -->
     <div id="setting-nav-shower">
         <a class="setting-nav-shower-a" href="#">
-            <span class="fa fa-coffee fa-2x"></span>
+            <span class="fa fa-plus fa-2x"></span>
         </a>
     </div>
     
-    <div id="setting-nav-shower-bis">
-        <a class="setting-nav-shower-a" href="#">
-            <span class="fa fa-pencil-square-o fa-2x"></span>
+    <div id="customize-nav-shower">
+        <a class="customize-nav-shower-a" href="#">
+            <span class="fa fa-gear fa-2x"></span>
         </a>
     </div>
 
-
+    <!-- SETTINGS NAV -->
     <div id="settings-nav" class="container">
         <form>
             <div class="row">
                 <div class="col-md-12">
-                    <h5>1. Select an Organism<a class="setting-nav-toggle pull-right" href="#"><span class="fa fa-gg"></span></a></h5>
+                    <h5>1. Select an Organism<a class="setting-nav-toggle pull-right" href="#"><span class="fa fa-plus"></span></a></h5>
 
                     <div class="form-group">
                         <select class="org_selector" style="width:75%">
@@ -242,139 +253,190 @@
                     <button class="btn btn-warning clear-graph">clear</button>
                 </div>
             </div>
-            <h5>3. Customize</h5>
-            <div class="row" style="padding-bottom: 10px;">
-                <div class="col-md-4" style="font-size: 0.8em;">
-                    <span>Node color</span>
-                </div>
-                <div class="col-md-4">
-
-                    <select class="node-color-select">
-                        <option value="YlGn">YlGn</option>
-                        <option value="YlGnBu">YlGnBu</option>
-                        <option value="GnBu">GnBu</option>
-                        <option value="BuGn">BuGn</option>
-                        <option value="PuBuGn">PuBuGn</option>
-                        <option value="PuBu">PuBu</option>
-                        <option value="BuPu">BuPu</option>
-                        <option value="RdPu">RdPu</option>
-                        <option value="PuRd">PuRd</option>
-                        <option value="OrRd">OrRd</option>
-                        <option value="YlOrRd">YlOrRd</option>
-                        <option value="YlOrBr">YlOrBr</option>
-                        <option value="Purples">Purples</option>
-                        <option value="Blues">Blues</option>
-                        <option value="Greens">Greens</option>
-                        <option value="Oranges">Oranges</option>
-                        <option value="Reds">Reds</option>
-                        <option value="Greys">Greys</option>
-                        <option value="PuOr">PuOr</option>
-                        <option value="BrBG">BrBG</option>
-                        <option value="PRGn">PRGn</option>
-                        <option value="PiYG">PiYG</option>
-                        <option value="RdBu">RdBu</option>
-                        <option value="RdGy">RdGy</option>
-                        <option value="RdYlBu">RdYlBu</option>
-                        <option value="Spectral">Spectral</option>
-                        <option value="RdYlGn">RdYlGn</option>
-                        <option value="Accent">Accent</option>
-                        <option value="Dark2">Dark2</option>
-                        <option value="Paired">Paired</option>
-                        <option value="Pastel1">Pastel1</option>
-                        <option value="Pastel2">Pastel2</option>
-                        <option value="Pastel3">Pastel3</option>
-                        <option value="Set1">Set1</option>
-                        <option value="Set2">Set2</option>
-                        <option value="Set3">Set3</option>
-                    </select>
-                </div>
-                <div class="col-md-4 text-left">
-                    <a href="#" class="apply-node-color">apply</a>
-                </div>
-            </div>
-            <div class="row" style="padding-bottom: 10px;">
-                <div class="col-md-4" style="font-size: 0.8em;">
-                    <span>Edge color</span>
-                </div>
-                <div class="col-md-4">
-
-                    <select class="edge-color-select">
-                        <option value="YlGn">YlGn</option>
-                        <option value="YlGnBu">YlGnBu</option>
-                        <option value="GnBu">GnBu</option>
-                        <option value="BuGn">BuGn</option>
-                        <option value="PuBuGn">PuBuGn</option>
-                        <option value="PuBu">PuBu</option>
-                        <option value="BuPu">BuPu</option>
-                        <option value="RdPu">RdPu</option>
-                        <option value="PuRd">PuRd</option>
-                        <option value="OrRd">OrRd</option>
-                        <option value="YlOrRd">YlOrRd</option>
-                        <option value="YlOrBr">YlOrBr</option>
-                        <option value="Purples">Purples</option>
-                        <option value="Blues">Blues</option>
-                        <option value="Greens">Greens</option>
-                        <option value="Oranges">Oranges</option>
-                        <option value="Reds">Reds</option>
-                        <option value="Greys">Greys</option>
-                        <option value="PuOr">PuOr</option>
-                        <option value="BrBG">BrBG</option>
-                        <option value="PRGn">PRGn</option>
-                        <option value="PiYG">PiYG</option>
-                        <option value="RdBu">RdBu</option>
-                        <option value="RdGy">RdGy</option>
-                        <option value="RdYlBu">RdYlBu</option>
-                        <option value="Spectral">Spectral</option>
-                        <option value="RdYlGn">RdYlGn</option>
-                        <option value="Accent">Accent</option>
-                        <option value="Dark2">Dark2</option>
-                        <option value="Paired">Paired</option>
-                        <option value="Pastel1">Pastel1</option>
-                        <option value="Pastel2">Pastel2</option>
-                        <option value="Pastel3">Pastel3</option>
-                        <option value="Set1">Set1</option>
-                        <option value="Set2">Set2</option>
-                        <option value="Set3">Set3</option>
-                    </select>
-                </div>
-                <div class="col-md-4 text-left">
-                    <a href="#" class="apply-edge-color">apply</a>
-                </div>
-            </div>
-
-            <div class="row" style="padding-bottom: 20px;">
-                <div class="col-md-4" style="font-size: 0.8em;">
-                    <span>Edge type</span>
-                </div>
-                <div class="col-md-4">
-                    <select class="edge-type-select" style="font-size:0.8em;">
-                        <option value="line">line</option>
-                        <option value="arrow">arrow</option>
-                        <option value="curvedArrow">curvedArrow</option>
-                        <option value="tapered">tapered</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <a href="#" class="apply-edge-type">apply</a>
-                </div>
-            </div>
-
-            <div class="row" style="padding-bottom: 20px;">
-                <div class="col-md-4" style="font-size: 0.8em;">
-                    <span>Background color</span>
-                </div>
-                <div class="col-md-4">
-                    <input id="bg-color-input" type="color"/>
-                </div>
-                <div class="col-md-4">
-                    <a href="#" class="apply-background-color">apply</a>
-                </div>
-            </div>
-            <div class="row text-center" style="padding-bottom: 20px;">
-                <button class="btn btn-sucess filter-node">Filter node with degree=0</button>
-            </div>
         </form>
     </div>
+
+    <!-- CUSTOMIZE BAR -->
+    <div id="customize-nav" class="container">
+        <h5>3. Customize<a class="customize-nav-toggle pull-right" href="#"><span class="fa fa-gear"></span></a></h5>
+        
+        <!-- NODE PROPERTIES -->
+        <h6>Node color</h6>
+        <div class="row small-size" style="padding-bottom: 10px;">
+            <div class="col-md-4">
+                <select class="node-color-prop-select">
+                    <option value="flux">flux</option>
+                    <option value="cumflux">cumflux</option>
+                    <option value="degree">degree</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="node-color-select">
+                    <option value="YlGn">YlGn</option>
+                    <option value="YlGnBu">YlGnBu</option>
+                    <option value="GnBu">GnBu</option>
+                    <option value="BuGn">BuGn</option>
+                    <option value="PuBuGn">PuBuGn</option>
+                    <option value="PuBu">PuBu</option>
+                    <option value="BuPu">BuPu</option>
+                    <option value="RdPu">RdPu</option>
+                    <option value="PuRd">PuRd</option>
+                    <option value="OrRd">OrRd</option>
+                    <option value="YlOrRd">YlOrRd</option>
+                    <option value="YlOrBr">YlOrBr</option>
+                    <option value="Purples">Purples</option>
+                    <option value="Blues">Blues</option>
+                    <option value="Greens">Greens</option>
+                    <option value="Oranges">Oranges</option>
+                    <option value="Reds">Reds</option>
+                    <option value="Greys">Greys</option>
+                    <option value="PuOr">PuOr</option>
+                    <option value="BrBG">BrBG</option>
+                    <option value="PRGn">PRGn</option>
+                    <option value="PiYG">PiYG</option>
+                    <option value="RdBu">RdBu</option>
+                    <option value="RdGy">RdGy</option>
+                    <option value="RdYlBu">RdYlBu</option>
+                    <option value="Spectral">Spectral</option>
+                    <option value="RdYlGn">RdYlGn</option>
+                    <option value="Accent">Accent</option>
+                    <option value="Dark2">Dark2</option>
+                    <option value="Paired">Paired</option>
+                    <option value="Pastel1">Pastel1</option>
+                    <option value="Pastel2">Pastel2</option>
+                    <option value="Pastel3">Pastel3</option>
+                    <option value="Set1">Set1</option>
+                    <option value="Set2">Set2</option>
+                    <option value="Set3">Set3</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-left">
+                <a href="#" class="apply-node-color">apply</a>
+            </div>
+        </div>
+        <h6>Node size</h6>
+        <div class="row small-size">
+            <div class="col-md-4">
+                <select class="node-size-prop-select">
+                    <option value="flux">flux</option>
+                    <option value="cumflux">cumflux</option>
+                    <option value="degree">degree</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input style="width:100%" value="5" class="nb-node-size" type="number" min="1" max="5" step="1"/>
+            </div>
+            <div class="col-md-4 text-left">
+                <a href="#" class="apply-node-size">apply</a>
+            </div>
+        </div>
+
+        <!-- EDGE PROPERTIES -->
+        <h6>Edge color</h6>
+        <div class="row small-size" style="padding-bottom: 10px;">
+            <div class="col-md-4">
+                <select class="edge-color-prop-select">
+                    <option value="flux">flux</option>
+                    <option value="absflux">absflux</option>
+                    <option value="sign">sign</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="edge-color-select">
+                    <option value="YlGn">YlGn</option>
+                    <option value="YlGnBu">YlGnBu</option>
+                    <option value="GnBu">GnBu</option>
+                    <option value="BuGn">BuGn</option>
+                    <option value="PuBuGn">PuBuGn</option>
+                    <option value="PuBu">PuBu</option>
+                    <option value="BuPu">BuPu</option>
+                    <option value="RdPu">RdPu</option>
+                    <option value="PuRd">PuRd</option>
+                    <option value="OrRd">OrRd</option>
+                    <option value="YlOrRd">YlOrRd</option>
+                    <option value="YlOrBr">YlOrBr</option>
+                    <option value="Purples">Purples</option>
+                    <option value="Blues">Blues</option>
+                    <option value="Greens">Greens</option>
+                    <option value="Oranges">Oranges</option>
+                    <option value="Reds">Reds</option>
+                    <option value="Greys">Greys</option>
+                    <option value="PuOr">PuOr</option>
+                    <option value="BrBG">BrBG</option>
+                    <option value="PRGn">PRGn</option>
+                    <option value="PiYG">PiYG</option>
+                    <option value="RdBu">RdBu</option>
+                    <option value="RdGy">RdGy</option>
+                    <option value="RdYlBu">RdYlBu</option>
+                    <option value="Spectral">Spectral</option>
+                    <option value="RdYlGn">RdYlGn</option>
+                    <option value="Accent">Accent</option>
+                    <option value="Dark2">Dark2</option>
+                    <option value="Paired">Paired</option>
+                    <option value="Pastel1">Pastel1</option>
+                    <option value="Pastel2">Pastel2</option>
+                    <option value="Pastel3">Pastel3</option>
+                    <option value="Set1">Set1</option>
+                    <option value="Set2">Set2</option>
+                    <option value="Set3">Set3</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-left">
+                <a href="#" class="apply-edge-color">apply</a>
+            </div>
+        </div>
+        <h6>Edge size</h6>
+        <div class="row small-size" style="padding-bottom: 20px;">
+            <div class="col-md-4">
+                <select class="edge-size-prop-select">
+                    <option value="flux">flux</option>
+                    <option value="absflux">absflux</option>
+                    <option value="sign">sign</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input style="width:100%" value="5" class="nb-edge-size" type="number" min="1" max="5" step="1"/>
+            </div>
+            <div class="col-md-4 text-left">
+                <a href="#" class="apply-edge-size">apply</a>
+            </div>
+        </div>
+
+        <div class="row small-size" style="padding-bottom: 20px;">
+            <div class="col-md-4">
+                <span>Edge type</span>
+            </div>
+            <div class="col-md-4">
+                <select class="edge-type-select" style="width:100%;">
+                    <option value="line">line</option>
+                    <option value="arrow">arrow</option>
+                    <option value="curvedArrow">curvedArrow</option>
+                    <option value="tapered">tapered</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="apply-edge-type">apply</a>
+            </div>
+        </div>
+
+        <div class="row small-size" style="padding-bottom: 20px;">
+            <div class="col-md-4">
+                <span>Background color</span>
+            </div>
+            <div class="col-md-4">
+                <input id="bg-color-input" type="color"/>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="apply-background-color">apply</a>
+            </div>
+        </div>
+
+        <div class="row text-center" style="padding-bottom: 20px;">
+            <button class="btn btn-sucess filter-node">Filter node with degree=0</button>
+        </div>
+    </div>
+    <!-- END CUSTOMIZE  -->
+
     <div class="row">
         <div id="cytoscape-container" style="border: 3px solid black">
         </div>
@@ -423,6 +485,19 @@
                 $('#setting-nav-shower').fadeIn();    
             });
 
+            // show hide customize nav
+            $('.customize-nav-shower-a').on('click', function(e){
+                e.preventDefault();
+                $('#customize-nav-shower').fadeOut();
+                $('#customize-nav').fadeIn();
+            });
+
+            var setting_nav_toggle = $('.customize-nav-toggle');
+            setting_nav_toggle.on('click', function(e) {
+                e.preventDefault();
+                $('#customize-nav').fadeOut();
+                $('#customize-nav-shower').fadeIn();    
+            });
 
             // resize sigma container
             var window_size = $(window).height() - 100;
@@ -440,11 +515,10 @@
             // pathway_selector.attr('disabled');
             //pathway_selector.chosen({no_results_text: "No match found..."});
 
-            console.log(pathway_selector);
             var meta_loader = $('.meta-loader');
 
+            // on change organism selection
             org_selector.on('change', function(evt, params){
-
                 // remove all options
                 $('.pathway_selector option').remove();
                 $('#help').css('display', 'none');
@@ -469,6 +543,7 @@
 
             // init empty sigma instance
             var graph = {'nodes': [], 'edges': []};
+            var nodes_ids_set = {};
             var edges_ids_set = {};
             var nb_graph = 0;
 
@@ -479,17 +554,17 @@
                 settings: {
                     nodeHaloColor: '#ecf0f1',
                     labelAlignment: 'top',
-                    //edgeHaloColor: '#ecf0f1',
                     defaultLabelColor: "#fff",
                     enableNodeHovering: true,
                     enableEdgeHovering: true,
                     edgeHoverSizeRatio: 1,
                     nodeHaloSize: 10,
-                    //edgeHaloSize: 10,
                     defaultNodeColor: '#ec5148',
-                    //maxEdgeSize: 1,
                     labelSize: 'proportionnal',
-                    labelColor: 'node',
+                    labelColor: 'default',
+                    // properties for legend 
+                    legendWidth: 75, 
+                    legendFontSize: 8,
                     animationsTime: 2500
                 }
             });
@@ -505,7 +580,7 @@
                 size: {
                     by: 'cumflux',
                     min: 0.5,
-                    max: 9,
+                    max: 5,
                     bins: 9
                 }
               },
@@ -585,16 +660,7 @@
               });
             }
 
-            // //renderHalo();
-
-            // s.renderers[0].bind('render', function(e) {
-            //   //renderHalo();
-            // });
-
-            // s.bind('clickStage', function(e) {
-            //   //renderHalo();
-            // });
-
+            // halo on node hovering
             s.bind('hovers', function(e) {
               var adjacentNodes = [],
                   adjacentEdges = [];
@@ -636,6 +702,7 @@
             }); // end bind hovers
             
             
+            // hide node if degree = 0
             function hideNodeBasedOnDegree() {
                 s.graph.nodes().forEach(function(node){
                     if (node.degree == 0) {
@@ -731,23 +798,59 @@
            // node color select
            $('.apply-node-color').on('click', function(e){
                 e.preventDefault();
+                var prop = $('.node-color-prop-select option:selected').text();
                 var selected = $('.node-color-select option:selected').text();
                 design.nodesBy('color', {
-                    by: 'cumflux',
+                    by: prop,
                     scheme: 'colorbrewer.' + selected,
                   });
                 design.apply();
+                legend.draw();
             });
 
-           // node color select
-           $('.apply-node-color').on('click', function(e){
+           // node size select
+           $('.apply-node-size').on('click', function(e){
                 e.preventDefault();
+                var prop = $('.node-size-prop-select option:selected').text();
+                var selected = $('.nb-node-size').val();
+
+                design.nodesBy('size', {
+                    by: prop,
+                    min:0.5,
+                    max: parseInt(selected),
+                    bins: 9
+                  });
+                design.apply();
+                legend.draw();
+            });
+
+           // edge color select
+           $('.apply-edge-color').on('click', function(e){
+                e.preventDefault();
+                var prop = $('.edge-color-prop-select option:selected').text();
                 var selected = $('.edge-color-select option:selected').text();
                 design.edgesBy('color', {
-                    by: 'flux',
+                    by: prop,
                     scheme: 'colorbrewer.' + selected,
                   });
                 design.apply();
+                legend.draw();
+            });
+
+            // edge color select
+           $('.apply-edge-size').on('click', function(e){
+                e.preventDefault();
+                var prop = $('.edge-size-prop-select option:selected').text();
+                var selected = $('.nb-edge-size').val();
+
+                design.edgesBy('size', {
+                    by: prop,
+                    min:0.5,
+                    max: parseInt(selected),
+                    bins: 9
+                  });
+                design.apply();
+                legend.draw();
             });
 
            // aplly edge color mapping
@@ -802,7 +905,7 @@
                             if (pathway_name == 'Whole model') {
                                 var fa = sigma.layouts.configForceLink(s, {
                                   worker: true,
-                                  barnesHutOptimize: false,
+                                  barnesHutOptimize: true,
                                   autoStop: true,
                                   background: true,
                                   gravity: 3,
@@ -810,7 +913,7 @@
                                   outboundAttractionDistribution: false,
                                   nodeSiblingsScale: 50,
                                   //nodeSiblingsAngleMin: 0.2,
-                                  linLogMode: false,
+                                  linLogMode: true,
                                   easing: 'cubicInOut'
                                 });
 

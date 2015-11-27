@@ -122,7 +122,7 @@ def launch_fba(username):
     # have often exception here du to encoding issues
     sbml_model = model.get_cobra_model()
     if sbml_model is None:
-        return render_template('errors/server_error.html')
+        return render_template('errors/server_error.html', form=LoginForm())
 
     solution = _launch_fba(sbml_model,
                            data['objective_functions'],
@@ -227,10 +227,10 @@ def get_kgml(username):
     try:
         resp = requests.get(S3_URL + filename)
     except ConnectionError:
-        return render_template('errors/server_error.html'), 500
+        return render_template('errors/server_error.html', form=LoginForm())
     # return error code if request failed
     if resp.status_code != 200:
-        return render_template('errors/server_error.html'), 500
+        return render_template('errors/server_error.html', form=LoginForm())
 
     # load fba analysis results
     results = json.loads(resp.text)
@@ -248,7 +248,7 @@ def get_kgml(username):
         kegg_model = Kegg.get_kgml_obj(pathway_id)
 
         if model is None or kegg_model is None:
-            return render_template('errors/page_not_found.html'), 404
+            return render_template('errors/page_not_found.html', form=LoginForm())
 
         kegg_model_name = request.args.get('pathway_name')
         cytoscape_formatted = build_kegg_network_mixed(kegg_model,
@@ -264,8 +264,9 @@ def download(username, project_id, analysis_id):
     filename = '{}/{}/{}'.format(username, project_id, analysis_id)
     text = download_from_s3(S3_URL, filename)
     if text is None:
-        return render_template('errors/server_error.html'), 500
+        return render_template('errors/server_error.html', form=LoginForm())
     f = filename.replace('/', '-') + '.json'
     return Response(text,
                     mimetype='application/json',
-                    headers={'Content-Disposition':'attachment;filename=' + f})
+                    headers={'Content-Disposition': 'attachment;filename=' + f}
+                    )

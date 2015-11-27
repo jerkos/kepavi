@@ -7,6 +7,9 @@ body {
   font-size: 1.05em;
 }
 
+.banger {
+  font-family: 'Bangers', cursive;
+}
 
 .navbar {
     height: 60px !important;
