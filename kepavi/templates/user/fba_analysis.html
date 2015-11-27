@@ -37,7 +37,8 @@
             /*height:100%;*/
             width:100%;
             overflow: hidden;
-            background-color: #2c3e50;
+            background-color: #eae3e3; 
+            /*#2c3e50;*/
         }
 
         hr {
@@ -795,22 +796,24 @@
             var legend = sigma.plugins.legend(s);
             legend.setPlacement('left');
            
-           // node color select
-           $('.apply-node-color').on('click', function(e){
-                e.preventDefault();
+            function update_node_color() {
                 var prop = $('.node-color-prop-select option:selected').text();
                 var selected = $('.node-color-select option:selected').text();
                 design.nodesBy('color', {
                     by: prop,
                     scheme: 'colorbrewer.' + selected,
                   });
+            }
+
+           // node color select
+           $('.apply-node-color').on('click', function(e){
+                e.preventDefault();
+                update_node_color();
                 design.apply();
                 legend.draw();
             });
 
-           // node size select
-           $('.apply-node-size').on('click', function(e){
-                e.preventDefault();
+           function update_node_size() {
                 var prop = $('.node-size-prop-select option:selected').text();
                 var selected = $('.nb-node-size').val();
 
@@ -820,26 +823,35 @@
                     max: parseInt(selected),
                     bins: 9
                   });
+           }
+
+           // node size select
+           $('.apply-node-size').on('click', function(e){
+                e.preventDefault();
+                update_node_size();
                 design.apply();
                 legend.draw();
             });
 
-           // edge color select
-           $('.apply-edge-color').on('click', function(e){
-                e.preventDefault();
+           function update_edge_color() {
                 var prop = $('.edge-color-prop-select option:selected').text();
                 var selected = $('.edge-color-select option:selected').text();
                 design.edgesBy('color', {
                     by: prop,
                     scheme: 'colorbrewer.' + selected,
                   });
+           }
+
+           // edge color select
+           $('.apply-edge-color').on('click', function(e){
+                e.preventDefault();
+                update_edge_color();
                 design.apply();
                 legend.draw();
             });
 
-            // edge color select
-           $('.apply-edge-size').on('click', function(e){
-                e.preventDefault();
+
+            function update_edge_size() {
                 var prop = $('.edge-size-prop-select option:selected').text();
                 var selected = $('.nb-edge-size').val();
 
@@ -849,17 +861,27 @@
                     max: parseInt(selected),
                     bins: 9
                   });
+            }
+            // edge color select
+           $('.apply-edge-size').on('click', function(e){
+                e.preventDefault();
+                update_edge_size();
                 design.apply();
                 legend.draw();
             });
 
-           // aplly edge color mapping
-           $('.apply-edge-type').on('click', function(e){
-                e.preventDefault();
+
+           function update_edge_type() {
                 var selected = $('.edge-type-select option:selected').text();
                 s.graph.edges().forEach(function(edge){
                     edge.type = selected;
                 });
+           }
+
+           // aplly edge color mapping
+           $('.apply-edge-type').on('click', function(e){
+                e.preventDefault();
+                update_edge_type();
                 s.refresh();
            });
 
@@ -887,8 +909,9 @@
                         function(data){
                             // add nodes 
                             addNodesAndEdges(data);
-                            // update design
-                            design.apply();
+
+                            // refresh then apply design
+                            s.refresh();
 
                             // setting node degree
                             s.graph.nodes().forEach(function(node){
@@ -902,10 +925,12 @@
                             });
 
                             // configure force links layout
-                            if (pathway_name == 'Whole model') {
+                            var whole_mode = pathway_name == 'Whole model';
+                            if (whole_mode) {
                                 var fa = sigma.layouts.configForceLink(s, {
                                   worker: true,
                                   barnesHutOptimize: true,
+                                  adjustSize: true,
                                   autoStop: true,
                                   background: true,
                                   gravity: 3,
@@ -917,11 +942,22 @@
                                   easing: 'cubicInOut'
                                 });
 
+                                fa.bind('stop', function() {
+                                    $('#centered-loader').css('display', 'none');
+                                });
                                 sigma.layouts.startForceLink();
                             }
+
+                            update_node_color();
+                            update_node_size();
+                            update_edge_color();
+                            update_edge_size();
+                            update_edge_type();
+                            design.apply();
                             legend.draw();
-                            s.refresh();
-                            $('#centered-loader').css('display', 'none');
+
+                            if (! whole_mode)
+                                $('#centered-loader').css('display', 'none');
                         }                           
                     );
             });
