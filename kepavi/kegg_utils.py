@@ -123,6 +123,7 @@ class Kegg(object):
     def _add_edge(data, id1, id2, arrow_src=False, arrow_target=True):
         concat = '-'.join([str(id1), str(id2)])
         edge_data = {'id': concat,
+                     'label': concat,
                      'source': id1,
                      'target': id2,
                      'targetArrowShape': 'triangle' if arrow_target else 'none',

@@ -412,11 +412,26 @@
                     <option value="line">line</option>
                     <option value="arrow">arrow</option>
                     <option value="curvedArrow">curvedArrow</option>
-                    <option value="tapered">tapered</option>
+                    <option value="tapered" selected="">tapered</option>
                 </select>
             </div>
             <div class="col-md-4">
                 <a href="#" class="apply-edge-type">apply</a>
+            </div>
+        </div>
+
+        <!-- LAYOUT -->
+        <h6>Layout</h6>
+        <div class="row small-size" style="padding-bottom: 20px;">
+            <div class="col-md-8">
+                <select class="layout-type-select" style="width:100%;">
+                    <option value="forceLink">forceLink</option>
+                    <option value="Reingold" selected>Reingold</option>
+                    <option value="Dagre">Dagre</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="apply-layout-type">apply</a>
             </div>
         </div>
 
@@ -449,8 +464,10 @@
     
     {# force directed layout #}
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceAtlas2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.fruchtermanReingold.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.animate.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.forceLink.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dagre.js') }}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.layouts.dagre.min.js') }}"></script>
 
     {# dragging node #}
@@ -464,6 +481,8 @@
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.colorbrewer.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.design.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.renderers.customEdgeShapes.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.renderers.edgeLabels.min.js')}}"></script>
+
 
     <script src="{{ url_for('static', filename='js/linkurious/plugins/sigma.plugins.legend.min.js')}}"></script>
     {# tooltips #}
@@ -553,16 +572,21 @@
                 graph: graph,
                 container: 'cytoscape-container',
                 settings: {
-                    nodeHaloColor: '#ecf0f1',
-                    labelAlignment: 'top',
-                    defaultLabelColor: "#fff",
-                    enableNodeHovering: true,
-                    enableEdgeHovering: true,
-                    edgeHoverSizeRatio: 1,
-                    nodeHaloSize: 10,
+                    drawEdgeLabels: true,
                     defaultNodeColor: '#ec5148',
+                    defaultLabelColor: "#000",
                     labelSize: 'proportionnal',
+                    edgeLabelSize: 'proportional',
+                    edgeLabelThreshold: 10,
                     labelColor: 'default',
+                    labelAlignment: 'top',
+                    labelThreshold: 1,
+                    // enableNodeHovering: true,
+                    enableEdgeHovering: true,
+                    // edgeHoverSizeRatio: 1,
+                    nodeHaloColor: '#ecf0f1',
+                    nodeHaloSize: 10,
+                    zoomMax: 4,
                     // properties for legend 
                     legendWidth: 75, 
                     legendFontSize: 8,
@@ -580,8 +604,8 @@
                 },
                 size: {
                     by: 'cumflux',
-                    min: 0.5,
-                    max: 5,
+                    min: 2,
+                    max: 6,
                     bins: 9
                 }
               },
@@ -655,52 +679,52 @@
             var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);                        
 
             // halo rendering
-            function renderHalo() {
-              s.renderers[0].halo({
-                nodes: s.graph.nodes()
-              });
-            }
+            // function renderHalo() {
+            //   s.renderers[0].halo({
+            //     nodes: s.graph.nodes()
+            //   });
+            // }
 
-            // halo on node hovering
-            s.bind('hovers', function(e) {
-              var adjacentNodes = [],
-                  adjacentEdges = [];
+            // // halo on node hovering
+            // s.bind('hovers', function(e) {
+            //   var adjacentNodes = [],
+            //       adjacentEdges = [];
 
 
-                if (e.data.leave.nodes.length) {
-                    console.log('leaving...');
-                    s.renderers[0].halo({
-                        nodes: [], //adjacentNodes,
-                        edges: [] //adjacentEdges
-                      });
-                    return;
-                }
+            //     if (e.data.leave.nodes.length) {
+            //         console.log('leaving...');
+            //         s.renderers[0].halo({
+            //             nodes: [], //adjacentNodes,
+            //             edges: [] //adjacentEdges
+            //           });
+            //         return;
+            //     }
 
-              if (!e.data.enter.nodes.length) 
-                return;
+            //   if (!e.data.enter.nodes.length) 
+            //     return;
 
-              // Get adjacent nodes:
-              e.data.enter.nodes.forEach(function(node) {
-                adjacentNodes = adjacentNodes.concat(s.graph.adjacentNodes(node.id));
-              });
+            //   // Get adjacent nodes:
+            //   e.data.enter.nodes.forEach(function(node) {
+            //     adjacentNodes = adjacentNodes.concat(s.graph.adjacentNodes(node.id));
+            //   });
 
-              // Add hovered nodes to the array and remove duplicates:
-              adjacentNodes = adjacentNodes.concat(e.data.enter.nodes);
+            //   // Add hovered nodes to the array and remove duplicates:
+            //   adjacentNodes = adjacentNodes.concat(e.data.enter.nodes);
 
-              // Get adjacent edges:
-              e.data.enter.nodes.forEach(function(node) {
-                adjacentEdges = adjacentEdges.concat(s.graph.adjacentEdges(node.id));
-              });
+            //   // Get adjacent edges:
+            //   e.data.enter.nodes.forEach(function(node) {
+            //     adjacentEdges = adjacentEdges.concat(s.graph.adjacentEdges(node.id));
+            //   });
 
-              // Remove duplicates:
-              adjacentEdges = adjacentEdges;
+            //   // Remove duplicates:
+            //   adjacentEdges = adjacentEdges;
 
-              // Render halo:
-              s.renderers[0].halo({
-                nodes: adjacentNodes,
-                edges: adjacentEdges
-              }); 
-            }); // end bind hovers
+            //   // Render halo:
+            //   s.renderers[0].halo({
+            //     nodes: adjacentNodes,
+            //     edges: adjacentEdges
+            //   }); 
+            // }); // end bind hovers
             
             
             // hide node if degree = 0
@@ -713,9 +737,13 @@
                 s.refresh();
             }
 
+            // clear graph and remvove all indexed
+            // nodes/edges ids 
             function cleanGraph() {
                 s.graph.clear();
                 s.refresh();
+                nodes_ids_set = {};
+                edges_ids_set = {};
             }
 
             // may be difficult because have to ensure
@@ -723,8 +751,8 @@
             function addNodesAndEdges(dat) {
                 var g = JSON.parse(dat);
                 var nodes = g['nodes'];
-                console.log(nodes);
                 var edges = g['edges'];
+                console.log(edges);
 
                 for (var i=0; i < nodes.length; ++i) {
                     var n = nodes[i];
@@ -885,6 +913,69 @@
                 s.refresh();
            });
 
+
+           function update_layout_type() {
+                var selected = $('.layout-type-select option:selected').text();
+                //FORCE LINK LAYOUT
+                if (selected == 'forceLink') {
+                    var fa = sigma.layouts.configForceLink(s, {
+                      worker: true,
+                      barnesHutOptimize: true,
+                      adjustSize: true,
+                      autoStop: true,
+                      background: true,
+                      gravity: 3,
+                      alignNodeSiblings: true,
+                      outboundAttractionDistribution: false,
+                      nodeSiblingsScale: 50,
+                      //nodeSiblingsAngleMin: 0.2,
+                      linLogMode: true,
+                      easing: 'cubicInOut'
+                    });
+
+                    fa.bind('stop', function() {
+                        $('#centered-loader').css('display', 'none');
+                    });
+                    sigma.layouts.startForceLink();
+                } else if (selected == 'Dagre') {
+                    var dagreListener = sigma.layouts.dagre.configure(s, {
+                      directed: true, // take edge direction into account
+                      rankdir: 'TB',  // Direction for rank nodes. Can be TB, BT, LR, or RL,
+                                      // where T = top, B = bottom, L = left, and R = right.
+                      easing: 'quadraticInOut', // animation transition function
+                      duration: 800,   // animation duration
+                      // nodes : s.graph.nodes().slice(0,30), // subset of nodes
+                      // boundingBox: {minX: 10, maxX: 20, minY: 10, maxY:20} // constrain layout bounds ; object or true (all current positions of the given nodes)
+                    });
+                    // Bind the events:
+                    dagreListener.bind('stop', function(e) {
+                      console.log(e.type);
+                      $('#centered-loader').css('display', 'none');
+                    });
+                    // Start the DAG layout:
+                    sigma.layouts.dagre.start(s);
+                } else { 
+                    //FRUCHTERMANREINGOLD LAYOUT
+                    var frListener = sigma.layouts.fruchtermanReingold.configure(s, {
+                      iterations: 500,
+                      easing: 'quadraticInOut',
+                      duration: 800
+                    });
+                    // Bind the events:
+                    frListener.bind('start stop interpolate', function(e) {
+                      $('#centered-loader').css('display', 'none');
+                    });
+                    // Start the Fruchterman-Reingold algorithm:
+                    sigma.layouts.fruchtermanReingold.start(s);
+                }
+                update_edge_type();
+           }
+
+           $('.apply-layout-type').on('click', function(e){
+                e.preventDefault();
+                update_layout_type();
+           }); 
+
            // apply background color
            $('.apply-background-color').on('click', function(e){
                 e.preventDefault();
@@ -927,25 +1018,7 @@
                             // configure force links layout
                             var whole_mode = pathway_name == 'Whole model';
                             if (whole_mode) {
-                                var fa = sigma.layouts.configForceLink(s, {
-                                  worker: true,
-                                  barnesHutOptimize: true,
-                                  adjustSize: true,
-                                  autoStop: true,
-                                  background: true,
-                                  gravity: 3,
-                                  alignNodeSiblings: true,
-                                  outboundAttractionDistribution: false,
-                                  nodeSiblingsScale: 50,
-                                  //nodeSiblingsAngleMin: 0.2,
-                                  linLogMode: true,
-                                  easing: 'cubicInOut'
-                                });
-
-                                fa.bind('stop', function() {
-                                    $('#centered-loader').css('display', 'none');
-                                });
-                                sigma.layouts.startForceLink();
+                                update_layout_type()
                             }
 
                             update_node_color();

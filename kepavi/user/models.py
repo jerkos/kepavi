@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    flaskbb.user.models
+    kepavi.user.models
     ~~~~~~~~~~~~~~~~~~~~
 
     This module provides the models for the user.
 
-    :copyright: (c) 2014 by the FlaskBB Team.
-    :license: BSD, see LICENSE for more details.
+    :copyright: (c) 2014 by the kepavi Team.
 """
 from datetime import datetime
 import logging
@@ -22,8 +21,8 @@ import uuid
 
 import cobra.io
 
-from kepavi._compat import max_integer
-from kepavi.extensions import db, cache, github
+# from kepavi._compat import max_integer
+from kepavi.extensions import db
 from kepavi.utils import random_email
 
 
@@ -40,6 +39,27 @@ class InsertableMixin(object):
         return self
 
 
+class KeggReaction(db.Model, InsertableMixin):
+    __tablename__ = 'kegg_reactions'
+
+    id = db.Column(db.String(50), primary_key=True)
+    name = db.Column(db.Text)
+    organism = db.Column(db.String(200), nullable=True)
+    _infos_by_id = {}
+
+    @property
+    def sname(self):
+        return self.name[3:]
+
+    @property
+    def infos_by_id():
+        if not KeggReaction._infos_by_id:
+            reactions = KeggReaction.query.all()
+            KeggReaction._infos_by_id = {react.id: (react.name, react.organism)
+                                         for react in reactions}
+        return KeggReaction._infos_by_id
+
+
 class BiomodelModification(db.Model, InsertableMixin):
     __tablename__ = 'biomodels_diffs'
 
@@ -49,8 +69,12 @@ class BiomodelModification(db.Model, InsertableMixin):
     biomodel_id = db.Column(db.Integer, db.ForeignKey('biomodels.id'))
     diff = db.Column(db.Text)  # stored in json
 
-    user = db.relationship('User', foreign_keys=[user_id], backref='biomodels_diffs')
-    biomodel = db.relationship('Biomodel', foreign_keys=[biomodel_id], backref='biomodels_diffs')
+    user = db.relationship('User',
+                           foreign_keys=[user_id],
+                           backref='biomodels_diffs')
+    biomodel = db.relationship('Biomodel',
+                               foreign_keys=[biomodel_id],
+                               backref='biomodels_diffs')
 
 
 class Biomodel(db.Model, InsertableMixin):

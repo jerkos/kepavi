@@ -164,6 +164,18 @@ def insert_models():
             logging.warn('Enable to remove file {}'.format(m))
 
 
+def populate_kegg_reactions_table():
+    import bioservices
+    kegg = bioservices.KEGG()
+    r = kegg.list('reaction')
+    reactions = r.strip().split('\n')
+    for react in reactions:
+        react_id, plus = react.split('\t')
+        name, equation = plus.split(';')
+        k = KeggReaction()
+        k.id = react_id
+
+
 @manager.command
 def test_read_models():
     m = BiomodelMongo.objects(organism='sse').first()

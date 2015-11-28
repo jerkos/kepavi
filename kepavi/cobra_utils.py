@@ -166,13 +166,13 @@ def _add_edge(data,
         sign = 'pos'
     else:
         sign = 'zero'
-    
+
     edge_data = {'id': edge_id,
                  'label': edge_id,
                  'source': id1,
                  'target': id2,
                  'size': 1,
-                 'type': 'tapered',
+                 # 'type': 'tapered',
                  'flux': flux,
                  'absflux': abs(flux),
                  'reversible': reaction.reversibility if reaction is not None else False,
