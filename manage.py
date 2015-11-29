@@ -1,5 +1,5 @@
 from kepavi.biomodels import BiomodelMongo
-from kepavi.user.models import User, Biomodel
+from kepavi.user.models import User, Biomodel, KeggReaction
 import os
 import csv
 import logging
@@ -164,16 +164,28 @@ def insert_models():
             logging.warn('Enable to remove file {}'.format(m))
 
 
+@manager.command
 def populate_kegg_reactions_table():
     import bioservices
+    logging.info('Getting all kegg reactions..')
     kegg = bioservices.KEGG()
+    logging.info('Done.')
     r = kegg.list('reaction')
     reactions = r.strip().split('\n')
+    logging.info('Begin insertion...')
     for react in reactions:
         react_id, plus = react.split('\t')
-        name, equation = plus.split(';')
+        p = plus.split(';')
+        try:
+            name, equation = p[0], p[1]
+        except (ValueError, IndexError):
+            name, equation = p[0], p[0]
         k = KeggReaction()
         k.id = react_id
+        k.name = name
+        k.organism = equation
+        k.save()
+    logging.info('Done.')
 
 
 @manager.command
