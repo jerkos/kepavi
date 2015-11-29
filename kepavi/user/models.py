@@ -52,7 +52,7 @@ class KeggReaction(db.Model, InsertableMixin):
         return self.name[3:]
 
     @property
-    def infos_by_id():
+    def infos_by_id(self):
         if not KeggReaction._infos_by_id:
             reactions = KeggReaction.query.all()
             KeggReaction._infos_by_id = {react.id: (react.name, react.organism)
