@@ -5,6 +5,7 @@ import requests
 import os
 from collections import defaultdict
 import random
+from kepavi.user.models import KeggReaction
 
 # Sigma js has my preference since it can handle
 # larger graph
@@ -155,6 +156,7 @@ def _add_edge(data,
               id1,
               id2,
               flux,
+              kegg_reac_id='',
               arrow_src=False,
               arrow_target=True):
     """
@@ -168,7 +170,7 @@ def _add_edge(data,
         sign = 'zero'
 
     edge_data = {'id': edge_id,
-                 'label': edge_id,
+                 'label': kegg_reac_id,  # edge_id,
                  'source': id1,
                  'target': id2,
                  'size': 1,
@@ -179,6 +181,16 @@ def _add_edge(data,
                  'sign': sign
                  }
     data['edges'].append(edge_data)
+
+
+def _get_react_name_by_kegg_react_id(react_id):
+    if not react_id.startswith('rn:'):
+        react_id = 'rn:' + react_id
+    try:
+        name, equ = KeggReaction.infos_by_id()[react_id]
+        return name
+    except KeyError:
+        return react_id + ' (can not map kegg id)'
 
 
 def _build_genome_scale_network(model, results):
@@ -327,7 +339,10 @@ def build_kegg_network_mixed(pathway,
             continue
 
         # skip rn: from the beginning, correspond to the kegg_id of the reaction
-        reac_name = reaction.name.split()[0][3:]  # if reaction.name.startswith('rn:') else reaction.name
+        full_reac_name = reaction.name.split()[0]
+        reac_name = full_reac_name[3:]  # if reaction.name.startswith('rn:') else reaction.name
+
+        reac_label = _get_react_name_by_kegg_react_id(full_reac_name)
 
         # substrate_kegg_ids = {substrate.name[4:] for substrate in reaction.substrates}
         # product_kegg_ids = {product.name[4:] for product in reaction.products}
@@ -372,6 +387,7 @@ def build_kegg_network_mixed(pathway,
                           reactant.id,
                           product.id,
                           flux,
+                          kegg_reac_id=reac_label,
                           arrow_src=arrow_src)
 
     # count total flux for each nodes
