@@ -166,6 +166,11 @@ def insert_models():
 
 @manager.command
 def populate_kegg_reactions_table():
+    """
+    TODO use sqlite3 std lib to use bulk insert
+    takes too long...
+    """
+
     import bioservices
     logging.info('Getting all kegg reactions..')
     kegg = bioservices.KEGG()
@@ -194,16 +199,15 @@ def test_read_models():
     import cobra.io
     import json
     try:
-        s = json.dumps(m.model).encode('utf-8')
-        with open('test.json', 'w') as f:
-            f.write(s)
-
-        sbml_model = cobra.io.load_json_model('test.json')
-        # sbml_model = cobra.io._from_dict(m.model)
+        # s = json.dumps(m.cobra_model).encode('utf-8')
+        # with open('test.json', 'w') as f:
+        #     f.write(s)
+        sbml_model = cobra.io._from_dict(m.cobra_model)
+        #sbml_model = cobra.io.load_json_model('test.json')
     except Exception as e:
         print "Got an exception:", e
         return None
-    print "NOTES:", sbml_model.reactions[0].notes
+    print "NOTES:", sbml_model.reactions[1].notes
     return sbml_model
 
 
