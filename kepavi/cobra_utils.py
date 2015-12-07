@@ -395,7 +395,6 @@ def build_kegg_network_mixed(pathway,
     for n in nodes:
         n_id = n['id']
         n['cumflux'] = int(fluxes_by_metabolites_ids[n_id])
-    print data
     return data
 
 
