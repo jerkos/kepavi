@@ -37,17 +37,15 @@ user = Blueprint("user", __name__, template_folder="../templates")
 @user.route("/<username>")
 @login_required
 def profile(username):
-    # if not current_user.is_authenticated():
-    #     return redirect(url_for('auth.login'))
     form = CreateProjectForm()
-    return render_template('user/profile.html', create_project_form=form)
+    return render_template('user/profile.html', create_project_form=form, display_sidebar=True)
 
 
 @user.route('/<username>/<int:project_id>-<slug>')
 @login_required
 def project(username, project_id, slug):
     p = Project.query.filter(Project.id == project_id).first_or_404()
-    return render_template('user/project.html', project=p)
+    return render_template('user/project.html', project=p, display_sidebar=True)
 
 
 @user.route('/<username>/create_project', methods=['POST'])
@@ -59,7 +57,7 @@ def create_project(username):
         p.save()
         return redirect(url_for('user.profile',
                                 username=current_user.username))
-    return render_template('errors/server_error.html')
+    return render_template('errors/server_error.html', form=LoginForm())
 
 
 @user.route('/<username>/<int:project_id>-<slug>/create_fba_analysis')
@@ -71,7 +69,8 @@ def create_fba_analysis(username, project_id, slug):
     p = Project.query.filter(Project.id == project_id).first_or_404()
     return render_template('user/create_fba_analysis.html',
                            form=form,
-                           project=p)
+                           project=p,
+                           display_sidebar=True)
 
 
 @user.route('/<username>/get_sbml_reactions')
@@ -196,7 +195,8 @@ def visualize_fba_analysis(username, analysis_id):
     pathways = Kegg.get_pathways_list(org=model.kegg_org)
     return render_template('user/fba_analysis.html',
                            analysis=analysis, organisms=orgs,
-                           model_name=model_name, pathways=pathways)
+                           model_name=model_name, pathways=pathways,
+                           display_sidebar=False)
 
 
 @user.route('/<username>/get_kegg_pathways', methods=['GET'])

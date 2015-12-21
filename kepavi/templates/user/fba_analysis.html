@@ -4,6 +4,7 @@
     Visualize network
 {% endblock %}
 
+
 {% block keywords %}
     <meta name="keywords" content="metabomatch, about">
     <meta name="description" content="The reasons why we made metabomatch">
@@ -25,20 +26,18 @@
             font-size: 0.8em;
         }
 
-        /*.main-sidebar {
-            display: none;
-        }*/
-
-        .load-cytoscape-btn {
-            /*margin-top: 50px;*/
+        h5 {
+            color: #00BCD4;
         }
 
+        #wrap {
+            display: none;
+        }
         #cytoscape-container {
-            /*height:100%;*/
-            width:100%;
-            overflow: hidden;
-            background-color: #eae3e3; 
-            /*#2c3e50;*/
+            margin-top: 60px !important;
+            min-height:100%;
+            min-width:100%;
+            background-color: #eae3e3;
         }
 
         hr {
@@ -49,8 +48,10 @@
             position: fixed;
             right: 0;
             max-width: 20%;
-            background-color: white;
-            border-radius: 5px;
+            margin-top: 60px !important;
+            height: 100%;
+            background-color: #455A64;
+            color: black;
             z-index: 25;
             font-size: 0.8em;
         }
@@ -60,7 +61,7 @@
         }
 
         #setting-nav-shower {
-            /*display: none;*/
+            margin-top: 70px !important;
             position:fixed;
             right:0;
             background-color: white;
@@ -70,14 +71,13 @@
         }
 
         #customize-nav-shower {
-            /*display: none;*/
+            margin-top: 130px !important;
             position:fixed;
             right:0;
             background-color: white;
             /*color: red;*/
             border-radius: 5px;
             z-index: 25;
-            margin-top: 60px;
             padding: 5px;
         }
 
@@ -110,7 +110,6 @@
           background-color: rgb(249, 247, 237);
           box-shadow: 0 2px 6px rgba(0,0,0,0.3);
           border-radius: 6px;
-          margin-left: -200px;
         }
 
         .sigma-tooltip-header {
@@ -197,7 +196,10 @@
 {% endblock %}
 
 {% block content %}
-    <!-- LOADER -->
+{% endblock %}
+
+{% block custom %}
+<!-- LOADER -->
     <div id="centered-loader"><span class="fa fa-circle-o-notch fa-spin fa-3x"></span></div>
 
     <!-- BUTTONS SETTINGS NAV -->
@@ -206,7 +208,7 @@
             <span class="fa fa-plus fa-2x"></span>
         </a>
     </div>
-    
+
     <div id="customize-nav-shower">
         <a class="customize-nav-shower-a" href="#">
             <span class="fa fa-gear fa-2x"></span>
@@ -260,7 +262,7 @@
     <!-- CUSTOMIZE BAR -->
     <div id="customize-nav" class="container">
         <h5>3. Customize<a class="customize-nav-toggle pull-right" href="#"><span class="fa fa-gear"></span></a></h5>
-        
+
         <!-- NODE PROPERTIES -->
         <h6>Node color</h6>
         <div class="row small-size" style="padding-bottom: 10px;">
@@ -453,10 +455,7 @@
     </div>
     <!-- END CUSTOMIZE  -->
 
-    <div class="row">
-        <div id="cytoscape-container" style="border: 3px solid black">
-        </div>
-    </div>
+<div id="cytoscape-container" style="border: 1px solid black"></div>
 {% endblock %}
 
 {% block scripts %}

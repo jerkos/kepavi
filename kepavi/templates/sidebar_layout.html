@@ -116,6 +116,7 @@
         <div id="wrap">
             <div class="container" >
                 <div class="row">
+                    {% if display_sidebar %}
                     <div class="col-md-2 main-sidebar">
                         <div class="sidebar-menu">
                             <ul class="nav nav-stacked">
@@ -172,8 +173,13 @@
                             </ul>
                         </div> #}
                     </div>
+                    {% endif %}
 
+                    {% if display_sidebar %}
                     <div class="col-md-10 main-content">
+                    {% else %}
+                    <div class="col-md-12 main-content">
+                    {% endif %}
                          {% block messages %}
                              {% include 'flashed_messages.html' %}
                          {% endblock %}
@@ -187,6 +193,9 @@
 
             </div> <!-- /container -->
         </div> <!-- end wrap -->
+
+        {% block custom %}
+        {% endblock %}
 
         {% block footer %}
             <div id="footer" style="background-color: #222222;">
